@@ -210,6 +210,64 @@ public class Loader extends AppCompatActivity {
         }.execute();
     }
 
+    public void driveDisable(){
+        Log.d("LOADER", "DRIVE ENABLE");
+
+        new AsyncTask<Void, Void, Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... params)
+            {
+                byte obuf[] = new byte[261];
+                byte ibuf[] = new byte[261];
+                int c = 0;
+                int z;
+
+                obuf[0] = (byte) (7 >> 8);
+                obuf[1] = (byte) (7 & 0xff);
+                obuf[2] = (byte) (0);
+                obuf[3] = (byte) (0);
+                obuf[4] = (byte) (11 >> 8);
+                obuf[5] = (byte) (11 & 0xff);
+                obuf[6] = (byte) (1);
+                obuf[7] = (byte) (16);
+                obuf[8] = (byte) (254 >> 8);
+                obuf[9] = (byte) (254 & 0xff);
+                obuf[10] = (byte) (2 >> 8);
+                obuf[11] = (byte) (2 & 0xff);
+                obuf[12] = (byte) (4);
+                obuf[13] = (byte) (0);
+                obuf[14] = (byte) (0);
+                obuf[15] = (byte) (0);
+                obuf[16] = (byte) ((0)&0xff);
+
+                try
+                {
+                    os.write(obuf, 0, 17);
+                    Log.d("DRIVE ENABLE:", "MESSAGE SENT");
+
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+
+                // read response
+                try
+                {
+                    z = is.read(ibuf, 0, 261);
+                    Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
+
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     public void startMotion(){
         Log.d("LOADER", "START MOTION");
 
