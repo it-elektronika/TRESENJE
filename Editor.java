@@ -191,9 +191,9 @@ public class Editor extends AppCompatActivity {
         ///////////////////////////// RANGE LIMITATION /////////////////////////////////////////////////////
         for (int i = 0; i < allET.size(); i = i + 7)
         {
-            allET.get(i).setEms(3);
+
             InputFilter[] filters = new InputFilter[1];
-            filters[0] = new InputFilter.LengthFilter(2);
+            filters[0] = new InputFilter.LengthFilter(3);
             allET.get(i).setFilters(filters);
         }
 
@@ -629,7 +629,7 @@ public class Editor extends AppCompatActivity {
         cond5 = false;
         cond6 = false;
         cond7 = false;
-        if(Integer.parseInt(allET.get(i).getText().toString()) > -1 && Integer.parseInt(allET.get(i).getText().toString()) < 91 || allET.get(i).getText().toString().isEmpty())
+        if(Integer.parseInt(allET.get(i).getText().toString()) > -1 && Integer.parseInt(allET.get(i).getText().toString()) < 181 || allET.get(i).getText().toString().isEmpty())
         {
             cond1 = true;
         }
@@ -637,9 +637,9 @@ public class Editor extends AppCompatActivity {
         {
             cond1 = false;
             allET.get(i).requestFocus();
-            Toast.makeText(getApplicationContext(), "INCORRECT ANGLE1 VALUE (valid range is: 10 - 90)", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "INCORRECT ANGLE1 VALUE (valid range is: 0 - 180)", Toast.LENGTH_LONG).show();
         }
-        if(Integer.parseInt(allET.get(i+1).getText().toString()) > 99 && Integer.parseInt(allET.get(i+1).getText().toString()) < 181)
+        if(Integer.parseInt(allET.get(i+1).getText().toString()) > -1 && Integer.parseInt(allET.get(i+1).getText().toString()) < 181)
         {
             cond2 = true;
         }
@@ -647,7 +647,7 @@ public class Editor extends AppCompatActivity {
         {
             cond2 = false;
             allET.get(i+1).requestFocus();
-            Toast.makeText(getApplicationContext(), "INCORRECT ANGLE2 VALUE (valid range is: 100 - 180)", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "INCORRECT ANGLE2 VALUE (valid range is: 0 - 180)", Toast.LENGTH_LONG).show();
             Log.d("WRONG VALUE:", allET.get(i+1).getText().toString());
         }
         if(Integer.parseInt(allET.get(i+2).getText().toString()) > -1 && Integer.parseInt(allET.get(i+2).getText().toString()) < 101)
@@ -661,7 +661,7 @@ public class Editor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "INCORRECT VELOCITY VALUE (valid range is: 0 - 100)", Toast.LENGTH_LONG).show();
             Log.d("wrong:", (allET.get(i+2).getText().toString()));
         }
-        if(Integer.parseInt(allET.get(i+3).getText().toString()) > -99 && Integer.parseInt(allET.get(i+3).getText().toString()) < 20001)
+        if(Integer.parseInt(allET.get(i+3).getText().toString()) > -99 && Integer.parseInt(allET.get(i+3).getText().toString()) < 30001)
         {
             cond4 = true;
         }
@@ -672,7 +672,7 @@ public class Editor extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "INCORRECT ACCELERATION VALUE (valid range is: 100 - 20000)", Toast.LENGTH_LONG).show();
 
         }
-        if(Integer.parseInt(allET.get(i+4).getText().toString()) > 99 && Integer.parseInt(allET.get(i+4).getText().toString()) < 20001)
+        if(Integer.parseInt(allET.get(i+4).getText().toString()) > 99 && Integer.parseInt(allET.get(i+4).getText().toString()) < 30001)
         {
             cond5 = true;
         }
@@ -692,7 +692,7 @@ public class Editor extends AppCompatActivity {
             allET.get(i+5).requestFocus();
             Toast.makeText(getApplicationContext(), "INCORRECT DELAY VALUE (valid range is: 0 - 1000)", Toast.LENGTH_LONG).show();
         }
-        if(Integer.parseInt(allET.get(i+6).getText().toString()) > -1 && Integer.parseInt(allET.get(i+6).getText().toString()) < 16)
+        if(Integer.parseInt(allET.get(i+6).getText().toString()) > -1 && Integer.parseInt(allET.get(i+6).getText().toString()) < 60)
         {
             cond7 = true;
         }

@@ -3,6 +3,7 @@ package com.it_elektronika.luka.tresenje;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +25,10 @@ import net.wimpi.modbus.msg.WriteMultipleRegistersResponse;
 import net.wimpi.modbus.net.TCPMasterConnection;
 import net.wimpi.modbus.procimg.SimpleRegister;
 
+import java.io.FilterInputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 
 
@@ -48,7 +52,8 @@ public class StatusMonitor extends AppCompatActivity {
     private TextView mregst12;
     private TextView mregst13;
     private TextView mregst14;
-    private TextView mregst15;
+    private ImageView cycleStatus;
+    private TextView elapsedTime;
 
     ///////////////////////////////
 
@@ -71,8 +76,13 @@ public class StatusMonitor extends AppCompatActivity {
     private String resString14;
     private String resString15;
     private String resString16;
-    private String enableString;
-    private String lastEnableString;
+    private Integer resString17;
+    private Integer resString18;
+
+
+    /////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////
 
 
 
@@ -100,6 +110,7 @@ public class StatusMonitor extends AppCompatActivity {
         Log.d("STATUS MONITOR", "onCreate");
 
 
+        loader = new Loader();
         ///////////////////////////////////////////////
         mregst0 = (TextView) findViewById(R.id.mrt0);
         mregst1 = (TextView) findViewById(R.id.mrt1);
@@ -116,7 +127,9 @@ public class StatusMonitor extends AppCompatActivity {
         mregst12 = (TextView) findViewById(R.id.mrt12);
         mregst13 = (TextView) findViewById(R.id.mrt13);
         mregst14 = (TextView) findViewById(R.id.mrt14);
-        mregst15 = (TextView) findViewById(R.id.mrt15);
+        cycleStatus = (ImageView)findViewById(R.id.cyclestat);
+
+
 
         ////////////////////////////////////////////////
 
@@ -203,6 +216,8 @@ public class StatusMonitor extends AppCompatActivity {
                 @Override
                 protected Void doInBackground(Void... params)
                 {
+                    //loader.makeConn();
+
                     while (!quitTask)
                     {
                         if(con.isConnected())
@@ -213,7 +228,7 @@ public class StatusMonitor extends AppCompatActivity {
                             ReadMultipleRegistersResponse res = null; //the response
 
                             // Prepare the request
-                            req = new ReadMultipleRegistersRequest(startReg, 38);
+                            req = new ReadMultipleRegistersRequest(startReg, 20);
 
                             // Prepare the transaction
                             trans = new ModbusTCPTransaction(con);
@@ -253,21 +268,11 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString14 = String.valueOf(res.getRegister(14).getValue());
                                 resString15 = String.valueOf(res.getRegister(15).getValue());
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
-                                enableString = String.valueOf(res.getRegister(17).getValue());
+                                resString17 = res.getRegister(17).getValue();
+                                resString18 = res.getRegister(18).getValue();
+                                Log.d("value:", resString17.toString());
 
-                                /////////////////////////////////////////////////////////////
-                                if (lastEnableString != enableString)
-                                {
-                                    if (enableString.equals("1"))
-                                    {
-                                        loader.driveEnable();
-                                    }
-                                    else
-                                    {
-                                        loader.driveDisable();
-                                    }
-                                }
-                                lastEnableString = enableString;
+
                                 ////////////////////////////////////////////////////////////
                             }
                             catch (Exception e)
@@ -278,7 +283,6 @@ public class StatusMonitor extends AppCompatActivity {
                                 break;
                             }
                             publishProgress();
-
                         }
                         else
                         {
@@ -308,9 +312,9 @@ public class StatusMonitor extends AppCompatActivity {
                         }
 
                         if (resString2.equals("0")) {
-                            mregst2.setText("OK");
-                        } else {
                             mregst2.setText("ERROR");
+                        } else {
+                            mregst2.setText("OK");
                         }
 
                         if (resString3.equals("0")) {
@@ -326,9 +330,9 @@ public class StatusMonitor extends AppCompatActivity {
                         }
 
                         if (resString5.equals("1")) {
-                            mregst5.setText("OK");
+                            mregst5.setText("PRENIZEK TLAK");
                         } else {
-                            mregst5.setText("NOK");
+                            mregst5.setText("OK");
                         }
 
                         if (resString6.equals("1")) {
@@ -367,16 +371,23 @@ public class StatusMonitor extends AppCompatActivity {
 
 
                         if (resString14.equals("1")) {
-                            mregst14.setText("velika");
+                            mregst14.setText("VELIKA");
                         }
                         else if (resString15.equals("1"))
                         {
-                            mregst14.setText("srednja");
+                            mregst14.setText("SREDNJA");
                         }
                         else if (resString16.equals("1"))
                         {
-                            mregst14.setText("mala");
+                            mregst14.setText("MALA");
                         }
+
+                        if (resString17.equals(1)) {
+                            cycleStatus.setImageResource(R.drawable.green);
+                        } else {
+                            cycleStatus.setImageResource(R.drawable.yellow);
+                        }
+                        elapsedTime.setText(resString18);
 
 
                         ///////////////////////////////////////////

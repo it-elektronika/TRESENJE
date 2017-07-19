@@ -484,7 +484,6 @@ public class Loader extends AppCompatActivity {
         }.execute();
     }
 
-
     private void sendData()
     {
         final Button sendButton = (Button) findViewById(R.id.sendbutton);
@@ -719,7 +718,9 @@ public class Loader extends AppCompatActivity {
                             }
                         }.execute();
                         Toast.makeText(getApplicationContext(), "SENDING FINISHED", Toast.LENGTH_LONG).show();
+
                     }
+
                 });
 
     }
@@ -785,6 +786,142 @@ public class Loader extends AppCompatActivity {
                 Log.d("selected:", selectedFromList);
             }
         });
+    }
+
+
+    public void driveEnable_extra()
+    {
+
+        byte obuf[] = new byte[261];
+        byte ibuf[] = new byte[261];
+        int c = 0;
+        int z;
+
+        obuf[0] = (byte) (7 >> 8);
+        obuf[1] = (byte) (7 & 0xff);
+        obuf[2] = (byte) (0);
+        obuf[3] = (byte) (0);
+        obuf[4] = (byte) (11 >> 8);
+        obuf[5] = (byte) (11 & 0xff);
+        obuf[6] = (byte) (1);
+        obuf[7] = (byte) (16);
+        obuf[8] = (byte) (254 >> 8);
+        obuf[9] = (byte) (254 & 0xff);
+        obuf[10] = (byte) (2 >> 8);
+        obuf[11] = (byte) (2 & 0xff);
+        obuf[12] = (byte) (4);
+        obuf[13] = (byte) (0);
+        obuf[14] = (byte) (0);
+        obuf[15] = (byte) (0);
+        obuf[16] = (byte) ((1)&0xff);
+
+        try
+        {
+            os.write(obuf, 0, 17);
+            Log.d("DRIVE ENABLE:", "MESSAGE SENT");
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        // read response
+        try
+        {
+            z = is.read(ibuf, 0, 261);
+            Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void driveDisable_extra()
+    {
+
+
+        ip_adrs = "192.168.1.30";
+        try {
+            es = new Socket(ip_adrs, 502);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            os = es.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            is = new BufferedInputStream(es.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("LOADER", "CONNECTION ESTABLISHED");
+
+
+        byte obuf[] = new byte[261];
+        byte ibuf[] = new byte[261];
+        int c = 0;
+        int z;
+
+        obuf[0] = (byte) (7 >> 8);
+        obuf[1] = (byte) (7 & 0xff);
+        obuf[2] = (byte) (0);
+        obuf[3] = (byte) (0);
+        obuf[4] = (byte) (11 >> 8);
+        obuf[5] = (byte) (11 & 0xff);
+        obuf[6] = (byte) (1);
+        obuf[7] = (byte) (16);
+        obuf[8] = (byte) (254 >> 8);
+        obuf[9] = (byte) (254 & 0xff);
+        obuf[10] = (byte) (2 >> 8);
+        obuf[11] = (byte) (2 & 0xff);
+        obuf[12] = (byte) (4);
+        obuf[13] = (byte) (0);
+        obuf[14] = (byte) (0);
+        obuf[15] = (byte) (0);
+        obuf[16] = (byte) ((0)&0xff);
+
+        try
+        {
+            os.write(obuf, 0, 17);
+            Log.d("DRIVE ENABLE:", "MESSAGE SENT");
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        // read response
+        try
+        {
+            z = is.read(ibuf, 0, 261);
+            Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public void makeConn(){
+        try {
+            ip_adrs = "192.168.1.30";
+            es = new Socket(ip_adrs, 502);
+            os = es.getOutputStream();
+            is = new BufferedInputStream(es.getInputStream());
+            Log.d("LOADER", "CONNECTION ESTABLISHED");
+        } catch (Exception e) {
+            Log.d("LOADER", "CONNECTION ERROR", e);
+        }
     }
 
 }
