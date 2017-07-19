@@ -171,6 +171,7 @@ void setup() {
   Mb.R[16] = 0;
   Mb.R[17] = 0;
   Mb.R[18] = 0;
+  Mb.R[19] = 0;
   ////////////////////////////////////////////////////////////////////////////////////////
   Serial.println("WELCOME");// zacni serial komunikacijo. zaradi izpisovanja vrednosti 
   pinMode(stop_total_pin, INPUT);
@@ -241,6 +242,7 @@ void loop() {
   Mb.R[15] = doza_srednja;
   Mb.R[16] = doza_mala;
   Mb.R[17] = cikel;
+  Mb.R[18] = elapsedTime;
   /////////////////////////////////////////////////////////////////////////
   startTime = millis();
   /////////////////////////////////////////////////////////////////////////
@@ -346,6 +348,7 @@ void loop() {
   //  obrat_kolesa_simple();
   //  preparation_no_shaking();
   //}
+  obrat_kolesa();
   gripper_manual();
 
   //////////////////////////////////////////////////////////
@@ -567,7 +570,7 @@ void obrat_kolesa_simple() //obracanje kolesa. ko ne trese
     if (kolo_obrat_senzor == HIGH)
     {
       digitalWrite(obracanje_dozirnega_kolesa_pin, LOW);
-      /
+      
     }  
   }
 }
@@ -707,7 +710,7 @@ void error_check()
 {
   if(tlacni_senzor_gripper_zaprt == 0)
   {
-    digitalWrite(kontroliran_stop_pin = 1);
+    digitalWrite(kontroliran_stop_pin, HIGH);
   }
 }
 /////////////////////////////////////////////////////////////////////////////////
@@ -719,6 +722,7 @@ void home_position_manual()
     delay(1000);
     digitalWrite(home_position_pin, LOW);
   }
+}
 ///////////////////////////////////////////////////////////////////////////////////
 void preparation_shaking()
 {
