@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 
 public class StatusMonitor extends AppCompatActivity {
@@ -77,6 +78,7 @@ public class StatusMonitor extends AppCompatActivity {
     private String resString15;
     private String resString16;
     private Integer resString17;
+    private Integer lastResString17;
     private Integer resString18;
 
 
@@ -99,7 +101,7 @@ public class StatusMonitor extends AppCompatActivity {
     private boolean quitTask = false;
     private boolean noConn = false;
 
-    Loader loader;
+    private Loader loader;
 
 
 
@@ -128,6 +130,7 @@ public class StatusMonitor extends AppCompatActivity {
         mregst13 = (TextView) findViewById(R.id.mrt13);
         mregst14 = (TextView) findViewById(R.id.mrt14);
         cycleStatus = (ImageView)findViewById(R.id.cyclestat);
+        elapsedTime = (TextView)findViewById(R.id.mrt15);
 
 
 
@@ -138,10 +141,14 @@ public class StatusMonitor extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.optmenu, menu);
+        if(resString17.equals(0)){
+            Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.optmenu, menu);
+
+        }
         return true;
+
     }
 
     @Override
@@ -170,6 +177,8 @@ public class StatusMonitor extends AppCompatActivity {
         }
     }
 
+
+
     public void onStop()
     {
         super.onStop();
@@ -184,7 +193,8 @@ public class StatusMonitor extends AppCompatActivity {
         }
     }
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         Log.d("STATUS MONITOR", "ON RESUME");
 
@@ -270,7 +280,7 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
                                 resString18 = res.getRegister(18).getValue();
-                                Log.d("value:", resString17.toString());
+                                Log.d("restring17:", resString17.toString());
 
 
                                 ////////////////////////////////////////////////////////////
@@ -382,12 +392,26 @@ public class StatusMonitor extends AppCompatActivity {
                             mregst14.setText("MALA");
                         }
 
-                        if (resString17.equals(1)) {
+                        if (resString17.equals(1))
+                        {
                             cycleStatus.setImageResource(R.drawable.green);
-                        } else {
-                            cycleStatus.setImageResource(R.drawable.yellow);
+                            if(!resString17.equals(lastResString17))
+                            {
+                                invalidateOptionsMenu();
+                            }
                         }
-                        elapsedTime.setText(resString18);
+                        else
+                        {
+                            cycleStatus.setImageResource(R.drawable.yellow);
+                            if(!resString17.equals(lastResString17))
+                            {
+                                invalidateOptionsMenu();
+                            }
+                        }
+                        lastResString17 = resString17;
+                        elapsedTime.setText(String.valueOf(resString18));
+
+
 
 
                         ///////////////////////////////////////////

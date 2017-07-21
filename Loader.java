@@ -18,7 +18,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import net.wimpi.modbus.Modbus;
+import net.wimpi.modbus.ModbusException;
 import net.wimpi.modbus.io.ModbusTCPTransaction;
+import net.wimpi.modbus.msg.ReadMultipleRegistersRequest;
+import net.wimpi.modbus.msg.ReadMultipleRegistersResponse;
 import net.wimpi.modbus.net.TCPMasterConnection;
 
 import java.io.BufferedInputStream;
@@ -36,14 +39,15 @@ public class Loader extends AppCompatActivity {
     private ArrayList loaderStr;
     private ArrayAdapter loaderadapter;
     private DataBaseHelper myDb;
+    private StatusMonitor statusMonitor;
 
     String resString;
 
-    TCPMasterConnection con = null;
-    ModbusTCPTransaction trans = null;
+    private TCPMasterConnection con = null;
+    private ModbusTCPTransaction trans = null;
 
-    InetAddress addr = null;
-    int port = Modbus.DEFAULT_PORT;
+    private InetAddress addr = null;
+    private int port = Modbus.DEFAULT_PORT;
     Button sendButton;
 
     private String ip_adrs;
@@ -64,6 +68,16 @@ public class Loader extends AppCompatActivity {
     private Integer transId;
     private Integer i;
     private Integer homePos;
+    private Intent mintent;
+    private Integer cycleValue;
+
+
+    private boolean quitTask = false;
+    private boolean noConn = false;
+
+
+
+    private String selectedFromList;
     Integer j;
 
     byte obuf[];
@@ -76,7 +90,7 @@ public class Loader extends AppCompatActivity {
         setContentView(R.layout.activity_loader);
 
         Log.d("LOADER", "onCreate");
-
+        selectedFromList = "";
         myDb = new DataBaseHelper(this);
         transId = 0;
         loaderlistview = (ListView)findViewById(R.id.loaderlistview);
@@ -85,9 +99,29 @@ public class Loader extends AppCompatActivity {
         loaderlistview.setAdapter(loaderadapter);
         loaderlistview.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         loaderlistview.setSelector(android.R.color.holo_blue_light);
-
+        statusMonitor = new StatusMonitor();
 
         AsyncTask asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    addr = InetAddress.getByName("192.168.1.90");
+
+                    con = new TCPMasterConnection(addr);
+                    con.setPort(port);
+                    con.connect();
+                    noConn = false;
+                    Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
+                } catch (Exception e) {
+                    Log.d("STATUS MONITOR", "NO CONNECTION", e);
+                    noConn = true;
+                    //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                }
+                return null;
+            }
+        }.execute();
+
+        asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
@@ -102,8 +136,7 @@ public class Loader extends AppCompatActivity {
                 return null;
             }
         }.execute();
-
-        //driveEnable();
+        getResString17();
         sendData();
         populateList();
         getSelected();
@@ -128,29 +161,10 @@ public class Loader extends AppCompatActivity {
     {
         super.onResume();
         Log.d("LOADER", "onResume");
-/*        asyncTask = new AsyncTask<Void, Void, Void>()
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                try
-                {
-                    ip_adrs = "192.168.1.74";
-                    es = new Socket(ip_adrs,502);
-                    os = es.getOutputStream();
-                    is = new BufferedInputStream(es.getInputStream());
-                    Log.d("onResumE", "CONNECTION ESTABLISHED");
-                }
-                catch (Exception e)
-                {
-                    Toast.makeText(getApplicationContext(), "NOT CONNECTED TO PLC", Toast.LENGTH_LONG).show();
-                    Log.d("onResume", "CONNECTION ERROR",e);
-                }
-                return null;
-            }
-        }.execute();*/
-
     }
+
+
+
 
     public void driveEnable(){
         Log.d("LOADER", "DRIVE ENABLE");
@@ -486,34 +500,48 @@ public class Loader extends AppCompatActivity {
 
     private void sendData()
     {
+
+
         final Button sendButton = (Button) findViewById(R.id.sendbutton);
         sendButton.setOnClickListener(new View.OnClickListener()
-                {
-                    public void onClick(View v)
-                    {
-                        Log.d("SEND DATA", "onCLick");
-                        try
-                        {
-                            getSelected();
-                        }
-                        catch (Exception e)
-                        {
-                            Toast.makeText(getApplicationContext(), "CHOOSE RECIPE BEFORE SENDING", Toast.LENGTH_LONG).show();
-                        }
+        {
 
+            public void onClick(View v)
+            {
+
+
+
+                Log.d("SEND DATA", "onCLick");
+                if(selectedFromList.isEmpty())
+                {
+                    Toast.makeText(getApplicationContext(), "CHOOSE RECIPE TO SEND", Toast.LENGTH_LONG).show();
+                }
+
+                else
+                {
+                    getResString17();
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    //cycleValue = getResString17();
+                    Log.d("before if test:", cycleValue.toString());
+                    if(cycleValue == 0)
+                    {
 
                         i = 0;
                         stepCounter = 0;
                         nextMove = 1;
                         clearTable();
 
-                        new AsyncTask<Void, Void, Void>()
-                        {
+                        new AsyncTask<Void, Void, Void>() {
                             @Override
-                            protected Void doInBackground(Void... params)
-                            {
-                                for (i = 0; i < myDb.yData.length; i = i + 7)
-                                {
+                            protected Void doInBackground(Void... params) {
+                                for (i = 0; i < myDb.yData.length; i = i + 7) {
                                     Log.d("SEND DATA", "doInBackground");
                                     a1 = myDb.yData[i] * (-29000);
                                     a2 = myDb.yData[i + 1] * (-29000);
@@ -523,10 +551,8 @@ public class Loader extends AppCompatActivity {
                                     dly = myDb.yData[i + 5];
                                     exec = myDb.yData[i + 6];
 
-                                    if (exec > 0)
-                                    {
-                                        for(int j = 0; j < exec; ++j)
-                                        {
+                                    if (exec > 0) {
+                                        for (int j = 0; j < exec; ++j) {
                                             byte obuf[] = new byte[261];
                                             byte ibuf[] = new byte[261];
                                             int c = 0;
@@ -560,15 +586,12 @@ public class Loader extends AppCompatActivity {
                                             obuf[22] = (byte) ((vel >> 16) & 0xff);
                                             obuf[23] = (byte) ((vel >> 8) & 0xff);
                                             obuf[24] = (byte) ((vel) & 0xff);
-                                            if (dly.equals(0))
-                                            {
+                                            if (dly.equals(0)) {
                                                 obuf[25] = (byte) (0);
                                                 obuf[26] = (byte) (0);
                                                 obuf[27] = (byte) (0);
                                                 obuf[28] = (byte) ((16) & 0xff);
-                                            }
-                                            else
-                                            {
+                                            } else {
                                                 obuf[25] = (byte) (0);
                                                 obuf[26] = (byte) (0);
                                                 obuf[27] = (byte) (0);
@@ -599,25 +622,19 @@ public class Loader extends AppCompatActivity {
                                             obuf[51] = (byte) (0);
                                             obuf[52] = (byte) ((1) & 0xff);
 
-                                            try
-                                            {
+                                            try {
                                                 os.write(obuf, 0, 53);
                                                 Log.d("SEND DATA A1:", "MESSAGE SENT");
                                                 transId++;
                                                 stepCounter++;
                                                 nextMove++;
-                                            }
-                                            catch (IOException e)
-                                            {
+                                            } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
-                                            try
-                                            {
+                                            try {
                                                 z = is.read(ibuf, 0, 261);
                                                 Log.d("SEND DATA A1:", "MESSAGE RECEIVED");
-                                            }
-                                            catch (IOException e)
-                                            {
+                                            } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
                                             //////////////////////////////
@@ -647,15 +664,12 @@ public class Loader extends AppCompatActivity {
                                             obuf[22] = (byte) ((vel >> 16) & 0xff);
                                             obuf[23] = (byte) ((vel >> 8) & 0xff);
                                             obuf[24] = (byte) ((vel) & 0xff);
-                                            if (dly.equals(0))
-                                            {
+                                            if (dly.equals(0)) {
                                                 obuf[25] = (byte) (0);
                                                 obuf[26] = (byte) (0);
                                                 obuf[27] = (byte) (0);
                                                 obuf[28] = (byte) ((16) & 0xff);
-                                            }
-                                            else
-                                            {
+                                            } else {
                                                 obuf[25] = (byte) (0);
                                                 obuf[26] = (byte) (0);
                                                 obuf[27] = (byte) (0);
@@ -686,43 +700,48 @@ public class Loader extends AppCompatActivity {
                                             obuf[51] = (byte) (0);
                                             obuf[52] = (byte) ((1) & 0xff);
 
-                                            try
-                                            {
+                                            try {
                                                 os.write(obuf, 0, 53);
                                                 Log.d("SEND DATA A2:", "MESSAGE SENT");
                                                 transId++;
                                                 stepCounter++;
                                                 nextMove++;
-                                            }
-                                            catch (IOException e)
-                                            {
+                                            } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
 
                                             // read response
-                                            try
-                                            {
+                                            try {
                                                 z = is.read(ibuf, 0, 261);
                                                 Log.d("SEND DATA A2", "MESSAGE RECEIVED");
-                                            }
-                                            catch (IOException e)
-                                            {
+                                            } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
                                         }
                                     }
                                 }
                                 homePosition();
-
+                                publishProgress();
                                 return null;
                             }
+
+                            @Override
+                            protected void onProgressUpdate(Void... values) {
+                                Toast.makeText(getApplicationContext(), "SENDING FINISHED", Toast.LENGTH_LONG).show();
+                            }
                         }.execute();
-                        Toast.makeText(getApplicationContext(), "SENDING FINISHED", Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), "CANNOT SEND RECIPE WHEN IN CYCLE", Toast.LENGTH_LONG).show();
+                        Log.d("else:", cycleValue.toString());
+                        mintent = new Intent(Loader.this, StatusMonitor.class);
+                        startActivity(mintent);
 
                     }
-
-                });
-
+                }
+            }
+        });
     }
 
 
@@ -775,7 +794,8 @@ public class Loader extends AppCompatActivity {
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedFromList = (loaderlistview.getItemAtPosition(position).toString());
+                selectedFromList = (loaderlistview.getItemAtPosition(position).toString());
+
                 //////////////////////////////////////////
                 myDb.getTN(selectedFromList);
                 SQLiteDatabase db = myDb.getWritableDatabase();
@@ -789,127 +809,83 @@ public class Loader extends AppCompatActivity {
     }
 
 
-    public void driveEnable_extra()
+
+    private void getResString17()
     {
 
-        byte obuf[] = new byte[261];
-        byte ibuf[] = new byte[261];
-        int c = 0;
-        int z;
-
-        obuf[0] = (byte) (7 >> 8);
-        obuf[1] = (byte) (7 & 0xff);
-        obuf[2] = (byte) (0);
-        obuf[3] = (byte) (0);
-        obuf[4] = (byte) (11 >> 8);
-        obuf[5] = (byte) (11 & 0xff);
-        obuf[6] = (byte) (1);
-        obuf[7] = (byte) (16);
-        obuf[8] = (byte) (254 >> 8);
-        obuf[9] = (byte) (254 & 0xff);
-        obuf[10] = (byte) (2 >> 8);
-        obuf[11] = (byte) (2 & 0xff);
-        obuf[12] = (byte) (4);
-        obuf[13] = (byte) (0);
-        obuf[14] = (byte) (0);
-        obuf[15] = (byte) (0);
-        obuf[16] = (byte) ((1)&0xff);
-
-        try
+        //////////////////////////////////////
+        Log.d("noConn:", String.valueOf(noConn));
+        if (!noConn)
         {
-            os.write(obuf, 0, 17);
-            Log.d("DRIVE ENABLE:", "MESSAGE SENT");
 
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+            new AsyncTask<Void, Void, Void>(){
 
-        // read response
-        try
-        {
-            z = is.read(ibuf, 0, 261);
-            Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
+                @Override
+                protected Void doInBackground(Void... params)
+                {
 
+                    if(con.isConnected())
+                    {
+                        int startReg = 0;
+
+                        ReadMultipleRegistersRequest req = null; //the request
+                        ReadMultipleRegistersResponse res = null; //the response
+
+                        // Prepare the request
+                        req = new ReadMultipleRegistersRequest(startReg, 18);
+
+                        // Prepare the transaction
+                        trans = new ModbusTCPTransaction(con);
+                        trans.setRequest(req);
+
+                        // execute the transaction
+
+                        try
+                        {
+                            trans.execute();
+                        }
+                        catch (ModbusException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+
+                        //get the response
+
+                        res = (ReadMultipleRegistersResponse) trans.getResponse();
+                        try
+                        {
+
+                            cycleValue = res.getRegister(17).getValue();
+                            Log.d("actual:", cycleValue.toString());
+                            ////////////////////////////////////////////////////////////
+                        }
+                        catch (Exception e)
+                        {
+                            Intent intent_ac = new Intent(Loader.this, StatusMonitor.class);
+                            startActivity(intent_ac);
+                            finish();
+
+                        }
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                    }
+
+                    return null;
+                }
+            }.execute();
         }
-        catch (IOException e)
+        else
         {
-            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
         }
+        //return cycleValue;
+
 
     }
 
-    public void driveDisable_extra()
-    {
-
-
-        ip_adrs = "192.168.1.30";
-        try {
-            es = new Socket(ip_adrs, 502);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            os = es.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            is = new BufferedInputStream(es.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d("LOADER", "CONNECTION ESTABLISHED");
-
-
-        byte obuf[] = new byte[261];
-        byte ibuf[] = new byte[261];
-        int c = 0;
-        int z;
-
-        obuf[0] = (byte) (7 >> 8);
-        obuf[1] = (byte) (7 & 0xff);
-        obuf[2] = (byte) (0);
-        obuf[3] = (byte) (0);
-        obuf[4] = (byte) (11 >> 8);
-        obuf[5] = (byte) (11 & 0xff);
-        obuf[6] = (byte) (1);
-        obuf[7] = (byte) (16);
-        obuf[8] = (byte) (254 >> 8);
-        obuf[9] = (byte) (254 & 0xff);
-        obuf[10] = (byte) (2 >> 8);
-        obuf[11] = (byte) (2 & 0xff);
-        obuf[12] = (byte) (4);
-        obuf[13] = (byte) (0);
-        obuf[14] = (byte) (0);
-        obuf[15] = (byte) (0);
-        obuf[16] = (byte) ((0)&0xff);
-
-        try
-        {
-            os.write(obuf, 0, 17);
-            Log.d("DRIVE ENABLE:", "MESSAGE SENT");
-
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        // read response
-        try
-        {
-            z = is.read(ibuf, 0, 261);
-            Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
-
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-    }
 
 
     public void makeConn(){

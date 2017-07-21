@@ -47,7 +47,7 @@ public class Editor extends AppCompatActivity {
     private ListView listview;
     private ArrayList<String> lStr;
     private EditText recName;
-    EditText editText;
+    private EditText editText;
     private ArrayAdapter<String> adapter;
     private ArrayList<EditText> allET;
     private String tableName;
@@ -394,7 +394,7 @@ public class Editor extends AppCompatActivity {
 
     }
 
-    public static void hideKeyboardFrom(Context context, View view) {
+    private static void hideKeyboardFrom(Context context, View view) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
