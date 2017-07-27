@@ -47,7 +47,7 @@ public class Loader extends AppCompatActivity {
     private ModbusTCPTransaction trans = null;
 
     private InetAddress addr = null;
-    private int port = Modbus.DEFAULT_PORT;
+    private final int port = Modbus.DEFAULT_PORT;
     Button sendButton;
 
     private String ip_adrs;
@@ -101,7 +101,7 @@ public class Loader extends AppCompatActivity {
         loaderlistview.setSelector(android.R.color.holo_blue_light);
         statusMonitor = new StatusMonitor();
 
-        AsyncTask asyncTask = new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
@@ -121,7 +121,7 @@ public class Loader extends AppCompatActivity {
             }
         }.execute();
 
-        asyncTask = new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
@@ -176,8 +176,6 @@ public class Loader extends AppCompatActivity {
             {
                 byte obuf[] = new byte[261];
                 byte ibuf[] = new byte[261];
-                int c = 0;
-                int z;
 
                 obuf[0] = (byte) (7 >> 8);
                 obuf[1] = (byte) (7 & 0xff);
@@ -211,7 +209,7 @@ public class Loader extends AppCompatActivity {
                 // read response
                 try
                 {
-                    z = is.read(ibuf, 0, 261);
+                    is.read(ibuf, 0, 261);
                     Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
 
                 }
@@ -234,8 +232,6 @@ public class Loader extends AppCompatActivity {
             {
                 byte obuf[] = new byte[261];
                 byte ibuf[] = new byte[261];
-                int c = 0;
-                int z;
 
                 obuf[0] = (byte) (7 >> 8);
                 obuf[1] = (byte) (7 & 0xff);
@@ -269,7 +265,7 @@ public class Loader extends AppCompatActivity {
                 // read response
                 try
                 {
-                    z = is.read(ibuf, 0, 261);
+                    is.read(ibuf, 0, 261);
                     Log.d("DRIVE ENABLE:", "MESSAGE RECEIVED");
 
                 }
@@ -292,8 +288,6 @@ public class Loader extends AppCompatActivity {
             {
                 byte obuf[] = new byte[261];
                 byte ibuf[] = new byte[261];
-                int c = 0;
-                int z;
 
                 obuf[0] = (byte) (transId >> 8);
                 obuf[1] = (byte) (transId & 0xff);
@@ -329,7 +323,7 @@ public class Loader extends AppCompatActivity {
                 }
                 try
                 {
-                    z = is.read(ibuf, 0, 261);
+                    is.read(ibuf, 0, 261);
                     Log.d("START MOTION:", "MESSAGE RECEIVED");
                 }
                 catch (IOException e)
@@ -354,8 +348,6 @@ public class Loader extends AppCompatActivity {
                 {
                     byte obuf[] = new byte[261];
                     byte ibuf[] = new byte[261];
-                    int c = 0;
-                    int z;
 
                     obuf[0] = (byte) (transId >> 8);
                     obuf[1] = (byte) (transId & 0xff);
@@ -389,7 +381,7 @@ public class Loader extends AppCompatActivity {
 
                     try
                     {
-                        z = is.read(ibuf, 0, 261);
+                        is.read(ibuf, 0, 261);
                         Log.d("CLEAR TABLE:", "MESSAGE RECEIVED");
                     }
                     catch (IOException e)
@@ -412,10 +404,8 @@ public class Loader extends AppCompatActivity {
             {
                 byte obuf[] = new byte[261];
                 byte ibuf[] = new byte[261];
-                int c = 0;
-                int z;
-                homePos = 0;
 
+                homePos = 0;
 
                 obuf[0] = (byte) (transId >> 8);
                 obuf[1] = (byte) (transId & 0xff);
@@ -485,7 +475,7 @@ public class Loader extends AppCompatActivity {
                 // read response
                 try
                 {
-                    z = is.read(ibuf, 0, 261);
+                    is.read(ibuf, 0, 261);
                     Log.d("HOME POSITION:", "MESSAGE RECEIVED");
 
                 }
@@ -528,7 +518,6 @@ public class Loader extends AppCompatActivity {
                     }
 
 
-                    //cycleValue = getResString17();
                     Log.d("before if test:", cycleValue.toString());
                     if(cycleValue == 0)
                     {
@@ -555,8 +544,6 @@ public class Loader extends AppCompatActivity {
                                         for (int j = 0; j < exec; ++j) {
                                             byte obuf[] = new byte[261];
                                             byte ibuf[] = new byte[261];
-                                            int c = 0;
-                                            int z;
 
                                             Log.d("I:", String.valueOf(i));
                                             //////////////////////////////
@@ -632,7 +619,7 @@ public class Loader extends AppCompatActivity {
                                                 e.printStackTrace();
                                             }
                                             try {
-                                                z = is.read(ibuf, 0, 261);
+                                                is.read(ibuf, 0, 261);
                                                 Log.d("SEND DATA A1:", "MESSAGE RECEIVED");
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -712,7 +699,7 @@ public class Loader extends AppCompatActivity {
 
                                             // read response
                                             try {
-                                                z = is.read(ibuf, 0, 261);
+                                                is.read(ibuf, 0, 261);
                                                 Log.d("SEND DATA A2", "MESSAGE RECEIVED");
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -767,17 +754,10 @@ public class Loader extends AppCompatActivity {
         Log.d("LOADER", "ON OPTION ITEM SELECTED");
         int i = item.getItemId();
         Intent intent;
-        if (i == R.id.statusmonitor)
+        if (i == R.id.back)
         {
             Log.v("Intent:", item.toString());
             intent = new Intent(Loader.this, StatusMonitor.class);
-            startActivity(intent);
-            return super.onOptionsItemSelected(item);
-        }
-        else if (i == R.id.editor)
-        {
-            Log.v("Intent:", item.toString());
-            intent = new Intent(Loader.this, EditorLogin.class);
             startActivity(intent);
             return super.onOptionsItemSelected(item);
         }
@@ -798,7 +778,7 @@ public class Loader extends AppCompatActivity {
 
                 //////////////////////////////////////////
                 myDb.getTN(selectedFromList);
-                SQLiteDatabase db = myDb.getWritableDatabase();
+
                 myDb.getAllData();
                 myDb.tableCheck();
                 //////////////////////////////////////////
@@ -828,8 +808,8 @@ public class Loader extends AppCompatActivity {
                     {
                         int startReg = 0;
 
-                        ReadMultipleRegistersRequest req = null; //the request
-                        ReadMultipleRegistersResponse res = null; //the response
+                        ReadMultipleRegistersRequest req; //the request
+                        ReadMultipleRegistersResponse res; //the response
 
                         // Prepare the request
                         req = new ReadMultipleRegistersRequest(startReg, 18);

@@ -33,11 +33,11 @@ class DataBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public String getTN(String tableName)
+    public void getTN(String tableName)
     {
         TABLE_NAME = tableName;
         Log.v("Name is:",TABLE_NAME);
-        return TABLE_NAME;
+
     }
 
 
@@ -47,7 +47,7 @@ class DataBaseHelper extends SQLiteOpenHelper {
         Log.v("TABLE CREATED:", TABLE_NAME);
     }
 
-    public boolean tableCheck(){
+    public void tableCheck(){
         Log.d("function:", "tablexists");
 
         tableExists = false;
@@ -63,11 +63,9 @@ class DataBaseHelper extends SQLiteOpenHelper {
             Log.d("number of rows:", String.valueOf(DatabaseUtils.queryNumEntries(db, TABLE_NAME)));
             tableExists = true;
         }
-        return tableExists;
-
     }
 
-    public boolean insertData(Integer idcount, Integer angle1, Integer angle2, Integer velocity, Integer acceleration, Integer decceleration, Integer delay, Integer execution){
+    public void insertData(Integer idcount, Integer angle1, Integer angle2, Integer velocity, Integer acceleration, Integer decceleration, Integer delay, Integer execution){
 
         SQLiteDatabase db = this.getWritableDatabase();
         Log.d("TABLE EXISTS:", String.valueOf(tableExists));
@@ -83,8 +81,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
         result = db.insert(TABLE_NAME, null,contentValues);
         Log.d("message", "Inserting values");
-
-        return result != -1;
     }
 
     public void updateData(Integer idcount, Integer angle1, Integer angle2, Integer velocity, Integer acceleration, Integer decceleration, Integer delay, Integer execution){
@@ -110,7 +106,7 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
 
 
-    public Integer[] getAllData()
+    public void getAllData()
     {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
@@ -140,10 +136,9 @@ class DataBaseHelper extends SQLiteOpenHelper {
             Log.d("ydata:", String.valueOf(yData[i]));
         }
         res.close();
-        return yData;
     }
 
-    public Cursor getAllTables(ArrayList arrayList, ArrayAdapter adapter) {
+    public void getAllTables(ArrayList arrayList, ArrayAdapter adapter) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
         if (result.moveToFirst()) {
@@ -158,7 +153,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
                 result.moveToNext();
             }
         }
-        return result;
     }
 
 

@@ -79,7 +79,8 @@ public class StatusMonitor extends AppCompatActivity {
     private String resString16;
     private Integer resString17;
     private Integer lastResString17;
-    private Integer resString18;
+    private long resString18;
+    private Integer resString19;
 
 
     /////////////////////////////////////////////////
@@ -141,14 +142,20 @@ public class StatusMonitor extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if(resString17.equals(0)){
-            Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.optmenu, menu);
+        try
+        {
+            if(resString17.equals(0))
+            {
+                Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
+                MenuInflater inflater = getMenuInflater();
+                inflater.inflate(R.menu.optmenu, menu);
+            }
+        }
+        catch (Exception e)
+        {
 
         }
         return true;
-
     }
 
     @Override
@@ -171,6 +178,14 @@ public class StatusMonitor extends AppCompatActivity {
             startActivity(intent);
             return super.onOptionsItemSelected(item);
         }
+        else if (i == R.id.settings)
+        {
+            intent = new Intent(StatusMonitor.this, Settings.class);
+            quitTask = true;
+            startActivity(intent);
+            return super.onOptionsItemSelected(item);
+        }
+
         else
         {
             return super.onOptionsItemSelected(item);
@@ -198,7 +213,7 @@ public class StatusMonitor extends AppCompatActivity {
         super.onResume();
         Log.d("STATUS MONITOR", "ON RESUME");
 
-        AsyncTask asyncTask = new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
@@ -234,11 +249,11 @@ public class StatusMonitor extends AppCompatActivity {
                         {
                             int startReg = 0;
 
-                            ReadMultipleRegistersRequest req = null; //the request
-                            ReadMultipleRegistersResponse res = null; //the response
+                            ReadMultipleRegistersRequest req; //the request
+                            ReadMultipleRegistersResponse res; //the response
 
                             // Prepare the request
-                            req = new ReadMultipleRegistersRequest(startReg, 20);
+                            req = new ReadMultipleRegistersRequest(startReg, 21);
 
                             // Prepare the transaction
                             trans = new ModbusTCPTransaction(con);
@@ -280,7 +295,8 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
                                 resString18 = res.getRegister(18).getValue();
-                                Log.d("restring17:", resString17.toString());
+                                Log.d("VALUE", String.valueOf(resString18));
+                                resString19 = res.getRegister(19).getValue();
 
 
                                 ////////////////////////////////////////////////////////////
@@ -294,11 +310,6 @@ public class StatusMonitor extends AppCompatActivity {
                             }
                             publishProgress();
                         }
-                        else
-                        {
-
-                        }
-
                     }
                     return null;
                 }
@@ -306,7 +317,7 @@ public class StatusMonitor extends AppCompatActivity {
                 @Override
                 protected void onProgressUpdate(Void... values)
                 {
-                    // once all points are read & drawn refresh the imageview
+
                     try {
 
                         if (resString0.equals("1")) {
@@ -411,13 +422,6 @@ public class StatusMonitor extends AppCompatActivity {
                         lastResString17 = resString17;
                         elapsedTime.setText(String.valueOf(resString18));
 
-
-
-
-                        ///////////////////////////////////////////
-
-                        ///////////////////////////////////////
-
                     }
                     catch (Exception e)
                     {
@@ -429,7 +433,31 @@ public class StatusMonitor extends AppCompatActivity {
         }
         else
         {
-            Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+            reconnect();
+        }
+    }
+    private void reconnect(){
+        while(noConn)
+        {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        addr = InetAddress.getByName("192.168.1.90");
+
+                        con = new TCPMasterConnection(addr);
+                        con.setPort(port);
+                        con.connect();
+                        noConn = false;
+                        Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
+                    } catch (Exception e) {
+                        Log.d("STATUS MONITOR", "NO CONNECTION", e);
+                        noConn = true;
+                        //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 }

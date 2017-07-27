@@ -182,11 +182,7 @@ public class Editor extends AppCompatActivity {
             grid.addView(editText);
         }
 
-        String[] strings = new String[allET.size()];
-        for (int i = 0; i < allET.size(); ++i)
-        {
-            strings[i] = allET.get(i).getText().toString();
-        }
+
 
         ///////////////////////////// RANGE LIMITATION /////////////////////////////////////////////////////
         for (int i = 0; i < allET.size(); i = i + 7)
@@ -267,7 +263,7 @@ public class Editor extends AppCompatActivity {
         varRow.setOrientation(LinearLayout.HORIZONTAL);
 
         String[] spremenljivkeTekst = {"#", "ANGLE1", "ANGLE2", "VELOC.", "ACCEL.", "DECEL.", "DELAY", "EXEC."};
-        int stL = spremenljivkeTekst.length;
+
         int cnt = 0;
         for (String aSpremenljivkeTekst : spremenljivkeTekst) {
             textView = new TextView(this);
@@ -427,14 +423,15 @@ public class Editor extends AppCompatActivity {
                     {
                         Log.d("EDITOR", "ADD DATA");
                         boolean skipRest1 = false;
-                        boolean skipRest2 = false;
-                        boolean skipRest3 = false;
+                        boolean skipRest2;
+                        boolean skipRest3;
                         boolean skipRest4 = false;
-                        boolean skipRest5 = false;
+                        boolean skipRest5;
                         tableName = recName.getText().toString();
                         Log.d("RECNAME:", tableName);
                         myDb.getTN(tableName);
                         SQLiteDatabase db = myDb.getWritableDatabase();
+
                         Integer idcount = 0;
 
 
@@ -715,7 +712,7 @@ public class Editor extends AppCompatActivity {
                         Log.d("EDITOR", "DELETE RECIPE");
                         tableName = recName.getText().toString();
                         myDb.getTN(tableName);
-                        SQLiteDatabase db = myDb.getWritableDatabase();
+
                         try
                         {
                             myDb.deleteTable();
@@ -746,7 +743,6 @@ public class Editor extends AppCompatActivity {
                 tableName = recName.getText().toString();
                 //////////////////////////////////////////
                 myDb.getTN(tableName);
-                SQLiteDatabase db = myDb.getWritableDatabase();
                 myDb.getAllData();
                 myDb.tableCheck();
                 for(int i = 0; i < allET.size(); ++i)
@@ -775,15 +771,10 @@ public class Editor extends AppCompatActivity {
         Log.d("EDITOR", "ON OPTIONS ITEM SELECTED");
         int i = item.getItemId();
         Intent intent;
-        if (i == R.id.statusmonitor)
+
+        if (i == R.id.back)
         {
             intent = new Intent(Editor.this, StatusMonitor.class);
-            startActivity(intent);
-            return super.onOptionsItemSelected(item);
-        }
-        else if (i == R.id.loader)
-        {
-            intent = new Intent(Editor.this, Loader.class);
             startActivity(intent);
             return super.onOptionsItemSelected(item);
         }
