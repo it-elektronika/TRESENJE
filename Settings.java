@@ -1,9 +1,6 @@
 package com.it_elektronika.luka.tresenje;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.media.audiofx.BassBoost;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,10 +10,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import net.wimpi.modbus.Modbus;
@@ -36,35 +31,32 @@ import java.net.InetAddress;
 
 public class Settings extends AppCompatActivity {
 
-    private boolean quitTask = false;
+
     private boolean noConn = false;
     private TCPMasterConnection con = null;
     private ModbusTCPTransaction trans = null;
     private InetAddress addr = null;
     private final int port = Modbus.DEFAULT_PORT;
 
-    private TextView tv1;
-    private TextView tv2;
-    private TextView tv3;
-
     private EditText et1;
     private EditText et2;
     private EditText et3;
+    private EditText et4;
 
     private Integer tim1;
     private Integer tim2;
     private Integer tim3;
+    private Integer tim4;
 
     private Integer et1_val;
     private Integer et2_val;
     private Integer et3_val;
+    private Integer et4_val;
 
     private Integer cycleValue;
-    boolean block;
 
-    Intent mintent;
 
-    Button button;
+    private Intent mintent;
 
 
     @Override
@@ -74,15 +66,13 @@ public class Settings extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         et1 = (EditText) findViewById(R.id.dovoljen_cas_netresenjaET);
-        et2 = (EditText) findViewById(R.id.cas_do_nepolnega_tresenjaET);
-        et3 = (EditText) findViewById(R.id.zapiranje_gripperjaET);
+        et2 = (EditText) findViewById(R.id.cas_do_zacetka_tresenjaET);
+        et3 = (EditText) findViewById(R.id.cas_do_nepolnega_tresenjaET);
+        et4 = (EditText) findViewById(R.id.zapiranje_gripperjaET);
         et1_val = 99;
         et2_val = 99;
         et3_val = 99;
-
-        et1.requestFocus();
-
-
+        et4_val = 99;
         new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -134,11 +124,31 @@ public class Settings extends AppCompatActivity {
             }
         });
 
+        et4.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
         getCycleVal();
         read_data();
         save_data();
+    }
 
+    public void onStop()
+    {
+        super.onStop();
 
+        try
+        {
+            con.close();
+        }
+        catch (Exception ignored)
+        {
+        }
     }
 
     @Override
@@ -150,7 +160,7 @@ public class Settings extends AppCompatActivity {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.optmenu_ed, menu);
         }
-        catch (Exception e)
+        catch (Exception ignored)
         {
 
         }
@@ -166,7 +176,7 @@ public class Settings extends AppCompatActivity {
         if (i == R.id.back)
         {
             intent = new Intent(Settings.this, StatusMonitor.class);
-            quitTask = true;
+
             startActivity(intent);
             return super.onOptionsItemSelected(item);
         }
@@ -180,9 +190,8 @@ public class Settings extends AppCompatActivity {
     {
         if (!noConn)
         {
-            quitTask = false;
-            new AsyncTask<Void, Void, Void>(){
-
+            new AsyncTask<Void, Void, Void>()
+            {
                 @Override
                 protected Void doInBackground(Void... params)
                 {
@@ -213,8 +222,10 @@ public class Settings extends AppCompatActivity {
                             tim1 = res.getRegister(18).getValue();
                             tim2 = res.getRegister(19).getValue();
                             tim3 = res.getRegister(20).getValue();
+                            tim4 = res.getRegister(21).getValue();
                             Log.d("tim1:", String.valueOf(tim1));
                             Log.d("tim2:", String.valueOf(tim2));
+                            Log.d("tim3:", String.valueOf(tim3));
                             Log.d("tim3:", String.valueOf(tim3));
                             ////////////////////////////////////////////////////////////
                         }
@@ -237,6 +248,7 @@ public class Settings extends AppCompatActivity {
                         et1.setText(String.valueOf(tim1));
                         et2.setText(String.valueOf(tim2));
                         et3.setText(String.valueOf(tim3));
+                        et4.setText(String.valueOf(tim4));
                     }
                     catch (Exception e)
                     {
@@ -259,11 +271,12 @@ public class Settings extends AppCompatActivity {
             et1_val = Integer.parseInt(et1.getText().toString());
             et2_val = Integer.parseInt(et2.getText().toString());
             et3_val = Integer.parseInt(et3.getText().toString());
+            et4_val = Integer.parseInt(et4.getText().toString());
             Log.d("tim1:", String.valueOf(et1_val));
             Log.d("tim2:", String.valueOf(et2_val));
             Log.d("tim3:", String.valueOf(et3_val));
         }
-        catch(Exception e)
+        catch(Exception ignored)
         {
 
         }
@@ -271,12 +284,15 @@ public class Settings extends AppCompatActivity {
     private void getCycleVal() {
         //////////////////////////////////////
         Log.d("noConn:", String.valueOf(noConn));
-        if (!noConn) {
-            new AsyncTask<Void, Void, Void>() {
-
+        if (!noConn)
+        {
+            new AsyncTask<Void, Void, Void>()
+            {
                 @Override
-                protected Void doInBackground(Void... params) {
-                    if (con.isConnected()) {
+                protected Void doInBackground(Void... params)
+                {
+                    if (con.isConnected())
+                    {
                         int startReg = 0;
 
                         ReadMultipleRegistersRequest req; //the request
@@ -289,31 +305,30 @@ public class Settings extends AppCompatActivity {
                         trans = new ModbusTCPTransaction(con);
                         trans.setRequest(req);
 
-                        try {
+                        try
+                        {
                             trans.execute();
-                        } catch (ModbusException e) {
+                        } catch (ModbusException e)
+                        {
                             e.printStackTrace();
                         }
 
                         res = (ReadMultipleRegistersResponse) trans.getResponse();
-                        try {
+                        try
+                        {
                             cycleValue = res.getRegister(17).getValue();
                             Log.d("actual:", cycleValue.toString());
-                            if(cycleValue.equals(0))
-                            {
-                                block = false;
-                            }
-                            else
-                            {
-                                block = true;
-                            }
+
                             ////////////////////////////////////////////////////////////
-                        } catch (Exception e) {
+                        } catch (Exception e)
+                        {
                             Intent intent_ac = new Intent(Settings.this, StatusMonitor.class);
                             startActivity(intent_ac);
                             finish();
                         }
-                    } else {
+                    }
+                    else
+                    {
                         Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
                     }
 
@@ -325,17 +340,12 @@ public class Settings extends AppCompatActivity {
         {
             Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
         }
-        Log.d("block", String.valueOf(block));
-    }
 
-    private static void hideKeyboardFrom(Context context, View view) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void save_data()
     {
-        button = (Button)findViewById(R.id.save_timers);
+        Button button = (Button) findViewById(R.id.save_timers);
 
         button.setOnClickListener(new View.OnClickListener()
         {
@@ -359,10 +369,8 @@ public class Settings extends AppCompatActivity {
 
                     if (!noConn)
                     {
-                        quitTask = false;
                         new AsyncTask<Void, Void, Void>()
                         {
-
                             @Override
                             protected Void doInBackground(Void... params)
                             {
@@ -370,22 +378,20 @@ public class Settings extends AppCompatActivity {
                                 {
                                     int startReg = 18;
 
-                                    WriteMultipleRegistersRequest req = null;
+                                    WriteMultipleRegistersRequest req;
                                     WriteMultipleRegistersResponse res = null;
 
-                                    SimpleRegister[] hr = new SimpleRegister[3];
+                                    SimpleRegister[] hr = new SimpleRegister[4];
 
                                     hr[0]=new SimpleRegister(et1_val);
                                     hr[1]=new SimpleRegister(et2_val);
                                     hr[2]=new SimpleRegister(et3_val);
+                                    hr[3]=new SimpleRegister(et4_val);
 
                                     req = new WriteMultipleRegistersRequest(startReg, hr);
 
-
                                     trans = new ModbusTCPTransaction(con);
                                     trans.setRequest(req);
-
-                                    // execute the transaction
 
                                     try
                                     {
@@ -398,20 +404,12 @@ public class Settings extends AppCompatActivity {
 
                                     res = (WriteMultipleRegistersResponse) trans.getResponse();
 
-                                    try
-                                    {
 
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Intent intent_ac = new Intent(Settings.this, Settings.class);
-                                        startActivity(intent_ac);
-                                        finish();
-                                    }
                                 }
                                 return null;
                             }
                         }.execute();
+                        Toast.makeText(getApplicationContext(), "SETTINGS SAVED", Toast.LENGTH_LONG).show();
                     }
                     else
                     {

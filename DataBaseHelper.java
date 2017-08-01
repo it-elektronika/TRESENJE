@@ -121,10 +121,7 @@ class DataBaseHelper extends SQLiteOpenHelper {
                 for (String columnName : columnNames) {
                     yData[countYData] = res.getInt(res.getColumnIndex(columnName));
                     countYData++;
-                    //Log.d("iteration: ", String.valueOf(i));
-                    //Log.d("data: ", yData[i]);
-                    //Log.d("res pos: ", String.valueOf(res.getPosition()));
-                    //Log.d("col ind: ", String.valueOf(res.getColumnIndex(columnNames[i])));
+
                 }
 
                 Log.d("outer", "end of iteration");
@@ -146,13 +143,14 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
                 if(!(result.getString( result.getColumnIndex("name"))).equals("android_metadata") && !(result.getString( result.getColumnIndex("name"))).equals("sqlite_sequence"))
                 {
-                    arrayList.add(result.getString( result.getColumnIndex("name")));
+                    arrayList.add(result.getString(result.getColumnIndex("name")));
                     adapter.notifyDataSetChanged();
                 }
 
                 result.moveToNext();
             }
         }
+        result.close();
     }
 
 

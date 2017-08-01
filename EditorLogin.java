@@ -18,7 +18,7 @@ public class EditorLogin extends AppCompatActivity {
 
     private final String pass = "tkk";
     private EditText editText;
-    private Button button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,10 +26,7 @@ public class EditorLogin extends AppCompatActivity {
         Log.d("EDITOR LOGIN", "ON CREATE");
 
         editText = (EditText) findViewById(R.id.editText);
-
-
-
-        button = (Button)findViewById(R.id.loginbutton);
+        Button button = (Button) findViewById(R.id.loginbutton);
         button.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
@@ -61,7 +58,8 @@ public class EditorLogin extends AppCompatActivity {
         });
     }
     @Override
-    protected void onStop(){
+    protected void onStop()
+    {
         super.onStop();
         Log.d("EDITOR LOGIN", "ON STOP");
     }
@@ -71,20 +69,15 @@ public class EditorLogin extends AppCompatActivity {
     {
         try
         {
-
             Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.optmenu_ed, menu);
 
         }
-        catch (Exception e)
+        catch (Exception ignored)
         {
-
         }
         return true;
-
-
-
     }
 
     @Override

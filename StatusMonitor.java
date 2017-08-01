@@ -3,40 +3,26 @@ package com.it_elektronika.luka.tresenje;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.wimpi.modbus.Modbus;
 import net.wimpi.modbus.ModbusException;
 import net.wimpi.modbus.io.ModbusTCPTransaction;
 import net.wimpi.modbus.msg.ReadMultipleRegistersRequest;
 import net.wimpi.modbus.msg.ReadMultipleRegistersResponse;
-import net.wimpi.modbus.msg.WriteMultipleRegistersRequest;
-import net.wimpi.modbus.msg.WriteMultipleRegistersResponse;
 import net.wimpi.modbus.net.TCPMasterConnection;
-import net.wimpi.modbus.procimg.SimpleRegister;
 
-import java.io.FilterInputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 
 public class StatusMonitor extends AppCompatActivity {
 
-    LinearLayout linearLayout;
-    Button buttonRead, buttonWrite, buttonTest;
     ////////////////////////////
     private TextView mregst0;
     private TextView mregst1;
@@ -58,8 +44,6 @@ public class StatusMonitor extends AppCompatActivity {
 
     ///////////////////////////////
 
-    private TextView gripperStatus;
-    private TextView modbusRegs;
     private String resString0;
     private String resString1;
     private String resString2;
@@ -80,17 +64,12 @@ public class StatusMonitor extends AppCompatActivity {
     private Integer resString17;
     private Integer lastResString17;
     private long resString18;
-    private Integer resString19;
 
 
     /////////////////////////////////////////////////
 
     //////////////////////////////////////////////////
 
-
-
-    private Integer connReg;
-    private  ArrayList arrayList;
 
     //
 
@@ -102,7 +81,7 @@ public class StatusMonitor extends AppCompatActivity {
     private boolean quitTask = false;
     private boolean noConn = false;
 
-    private Loader loader;
+
 
 
 
@@ -113,7 +92,7 @@ public class StatusMonitor extends AppCompatActivity {
         Log.d("STATUS MONITOR", "onCreate");
 
 
-        loader = new Loader();
+
         ///////////////////////////////////////////////
         mregst0 = (TextView) findViewById(R.id.mrt0);
         mregst1 = (TextView) findViewById(R.id.mrt1);
@@ -151,7 +130,7 @@ public class StatusMonitor extends AppCompatActivity {
                 inflater.inflate(R.menu.optmenu, menu);
             }
         }
-        catch (Exception e)
+        catch (Exception ignored)
         {
 
         }
@@ -199,10 +178,11 @@ public class StatusMonitor extends AppCompatActivity {
         super.onStop();
         Log.d("STATUS MONITOR", "ON STOP");
         quitTask = true;
-        try {
+        try
+        {
             con.close();
         }
-        catch (Exception e)
+        catch (Exception ignored)
         {
 
         }
@@ -224,9 +204,11 @@ public class StatusMonitor extends AppCompatActivity {
                     con.connect();
                     noConn = false;
                     Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
-                } catch (Exception e) {
+                } catch (Exception e)
+                {
                     Log.d("STATUS MONITOR", "NO CONNECTION", e);
                     noConn = true;
+
                     //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
                 }
                 return null;
@@ -241,7 +223,7 @@ public class StatusMonitor extends AppCompatActivity {
                 @Override
                 protected Void doInBackground(Void... params)
                 {
-                    //loader.makeConn();
+
 
                     while (!quitTask)
                     {
@@ -253,7 +235,7 @@ public class StatusMonitor extends AppCompatActivity {
                             ReadMultipleRegistersResponse res; //the response
 
                             // Prepare the request
-                            req = new ReadMultipleRegistersRequest(startReg, 21);
+                            req = new ReadMultipleRegistersRequest(startReg, 23);
 
                             // Prepare the transaction
                             trans = new ModbusTCPTransaction(con);
@@ -294,9 +276,8 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString15 = String.valueOf(res.getRegister(15).getValue());
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
-                                resString18 = res.getRegister(18).getValue();
-                                Log.d("VALUE", String.valueOf(resString18));
-                                resString19 = res.getRegister(19).getValue();
+                                resString18 = res.getRegister(22).getValue();
+
 
 
                                 ////////////////////////////////////////////////////////////
@@ -350,7 +331,7 @@ public class StatusMonitor extends AppCompatActivity {
                             mregst4.setText("Z TRESENJEM");
                         }
 
-                        if (resString5.equals("1")) {
+                        if (resString5.equals("0")) {
                             mregst5.setText("PRENIZEK TLAK");
                         } else {
                             mregst5.setText("OK");
@@ -411,7 +392,7 @@ public class StatusMonitor extends AppCompatActivity {
                                 invalidateOptionsMenu();
                             }
                         }
-                        else
+                        else if(resString17.equals(0))
                         {
                             cycleStatus.setImageResource(R.drawable.yellow);
                             if(!resString17.equals(lastResString17))
@@ -419,7 +400,18 @@ public class StatusMonitor extends AppCompatActivity {
                                 invalidateOptionsMenu();
                             }
                         }
+
+                        else if(resString17.equals(2))
+                        {
+                            cycleStatus.setImageResource(R.drawable.red);
+                            if(!resString17.equals(lastResString17))
+                            {
+                                invalidateOptionsMenu();
+                            }
+                        }
+
                         lastResString17 = resString17;
+
                         elapsedTime.setText(String.valueOf(resString18));
 
                     }
@@ -439,6 +431,14 @@ public class StatusMonitor extends AppCompatActivity {
     private void reconnect(){
         while(noConn)
         {
+            try
+            {
+                Thread.sleep(2000);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -449,9 +449,9 @@ public class StatusMonitor extends AppCompatActivity {
                         con.setPort(port);
                         con.connect();
                         noConn = false;
-                        Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
+                        Log.d("RECONNECT", "CONNECTION ESTABLISHED");
                     } catch (Exception e) {
-                        Log.d("STATUS MONITOR", "NO CONNECTION", e);
+                        Log.d("RECONNECT", "NO CONNECTION", e);
                         noConn = true;
                         //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
                     }

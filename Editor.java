@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.hardware.input.InputManager;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -33,7 +31,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import static android.view.inputmethod.EditorInfo.IME_ACTION_SEND;
 
 public class Editor extends AppCompatActivity {
 
@@ -47,7 +44,6 @@ public class Editor extends AppCompatActivity {
     private ListView listview;
     private ArrayList<String> lStr;
     private EditText recName;
-    private EditText editText;
     private ArrayAdapter<String> adapter;
     private ArrayList<EditText> allET;
     private String tableName;
@@ -116,7 +112,7 @@ public class Editor extends AppCompatActivity {
 
         leftBarSup.addView(recLabel);
 
-        //final EditText recName;
+
         recName = new EditText(this);
         recName.setTextSize(25);
         recName.setSingleLine();
@@ -133,11 +129,11 @@ public class Editor extends AppCompatActivity {
         newrec.setText(R.string.neww);
         newrec.setTextSize(25);
         newrec.setWidth(250);
-        //newrec.setLayoutParams(lefttopParams);
+
         leftBarTop.addView(newrec);
 
         save = new Button(this);
-        //save.setLayoutParams(lefttopParams);
+
         save.setWidth(250);
         save.setText(R.string.save);
         save.setTextSize(25);
@@ -162,11 +158,10 @@ public class Editor extends AppCompatActivity {
         grid.setOrientation(GridLayout.HORIZONTAL);
         grid.setColumnCount(number_of_columns);
 
-
         allET = new ArrayList<>();
         for (int i = 0; i < 70; ++i)
         {
-            editText = new EditText(this);
+            EditText editText = new EditText(this);
             allET.add(editText);
             editText.setText(String.valueOf(0));
             editText.setTextSize(35);
@@ -181,9 +176,6 @@ public class Editor extends AppCompatActivity {
             //editText.generateViewId();
             grid.addView(editText);
         }
-
-
-
         ///////////////////////////// RANGE LIMITATION /////////////////////////////////////////////////////
         for (int i = 0; i < allET.size(); i = i + 7)
         {
@@ -192,8 +184,6 @@ public class Editor extends AppCompatActivity {
             filters[0] = new InputFilter.LengthFilter(3);
             allET.get(i).setFilters(filters);
         }
-
-
         for (int i = 1; i < allET.size(); i = i + 7)
         {
             allET.get(i).setText(String.valueOf(100));
@@ -201,20 +191,17 @@ public class Editor extends AppCompatActivity {
             filters[0] = new InputFilter.LengthFilter(3);
             allET.get(i).setFilters(filters);
         }
-
         for (int i = 2; i < allET.size(); i = i + 7)
         {
             InputFilter[] filters = new InputFilter[1];
             filters[0] = new InputFilter.LengthFilter(3);
             allET.get(i).setFilters(filters);
         }
-
         for (int i = 3; i < allET.size(); i = i + 7)
         {
             allET.get(i).setText(String.valueOf(100));
             allET.get(i).setEms(5);
         }
-
         for (int i = 4; i < allET.size(); i = i + 7)
         {
             allET.get(i).setText(String.valueOf(100));
@@ -225,7 +212,6 @@ public class Editor extends AppCompatActivity {
 
             allET.get(i).setEms(3);
         }
-
         //////////////////////////////////////////////
         LinearLayout stepCol = new LinearLayout(this);
         LinearLayout.LayoutParams stepColParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -265,11 +251,13 @@ public class Editor extends AppCompatActivity {
         String[] spremenljivkeTekst = {"#", "ANGLE1", "ANGLE2", "VELOC.", "ACCEL.", "DECEL.", "DELAY", "EXEC."};
 
         int cnt = 0;
-        for (String aSpremenljivkeTekst : spremenljivkeTekst) {
+        for (String aSpremenljivkeTekst : spremenljivkeTekst)
+        {
             textView = new TextView(this);
             textView.setText(aSpremenljivkeTekst);
             textView.setTextSize(35);
-            if (cnt == 1){
+            if (cnt == 1)
+            {
                 textView.setPadding(25, 25, 1, 25);
             }
             else if (cnt == 2)
@@ -296,8 +284,6 @@ public class Editor extends AppCompatActivity {
             cnt = cnt + 1;
             varRow.addView(textView);
         }
-
-
         ////////////////////////////////////////////////////////////////////////////
         LinearLayout frame = new LinearLayout(this);
         LinearLayout.LayoutParams frameParam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -371,7 +357,6 @@ public class Editor extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onResume()
     {
@@ -379,7 +364,6 @@ public class Editor extends AppCompatActivity {
         super.onResume();
 
         listview.requestFocus();
-
     }
 
     @Override
@@ -387,7 +371,6 @@ public class Editor extends AppCompatActivity {
     {
         Log.d("EDITOR", "ON STOP");
         super.onStop();
-
     }
 
     private static void hideKeyboardFrom(Context context, View view) {
@@ -483,7 +466,6 @@ public class Editor extends AppCompatActivity {
                             {
                                 skipRest4 = false;
                             }
-
                         }
 
 
@@ -567,11 +549,6 @@ public class Editor extends AppCompatActivity {
                             }
 
                         }
-                        else
-                        {
-                            Log.d("MESSage:", "here");
-                        }
-
 
                         hideKeyboardFrom(context, v);
 
@@ -724,7 +701,6 @@ public class Editor extends AppCompatActivity {
                         {
                             Toast.makeText(getApplicationContext(), "PLEASE SELECT RECIPE", Toast.LENGTH_LONG).show();
                         }
-
                     }
                 });
     }
