@@ -319,14 +319,14 @@ void loop()
   
   timer1 = (EEPROM.read(0))*60000;
   timer2 = (EEPROM.read(1))*1000;
-  timer3 = (EEPROM.read(2))*60000;
+  timer3 = (EEPROM.read(2))*1000;
   timer4 = (EEPROM.read(3))*1000; 
 
   if(first_run)
   {   
     Mb.R[18] = timer1 / 60000;
     Mb.R[19] = timer2 / 1000;
-    Mb.R[20] = timer3 / 60000;
+    Mb.R[20] = timer3 / 1000;
     Mb.R[21] = timer4 / 1000;
     first_run = false; 
   }
@@ -336,23 +336,23 @@ void loop()
   EEPROM.update(2, Mb.R[20]);    
   EEPROM.update(3, Mb.R[21]);  
 
-  Serial.println("1:");
-  Serial.println(Mb.R[18]);
-  Serial.println("2:");
-  Serial.println(Mb.R[19]);
-  Serial.println("3:");
-  Serial.println(Mb.R[20]);
-  Serial.println("4:");
-  Serial.println(Mb.R[21]);
+  //Serial.println("1:");
+  //Serial.println(Mb.R[18]);
+  //Serial.println("2:");
+  //Serial.println(Mb.R[19]);
+  //Serial.println("3:");
+  //Serial.println(Mb.R[20]);
+  //Serial.println("4:");
+  //Serial.println(Mb.R[21]);
   
-  Serial.println("timer1:");
-  Serial.println(timer1);
-  Serial.println("timer2:");
-  Serial.println(timer2);
-  Serial.println("timer3:");
-  Serial.println(timer3);
-  Serial.println("timer4:");
-  Serial.println(timer4);
+  //Serial.println("timer1:");
+  //Serial.println(timer1);
+  //Serial.println("timer2:");
+  //Serial.println(timer2);
+  //Serial.println("timer3:");
+  //Serial.println(timer3);
+  //Serial.println("timer4:");
+  //Serial.println(timer4);
 
   //Serial.println("Razlika izhod:");
   //Serial.println(razlika_izhod);
@@ -375,129 +375,148 @@ void loop()
   cikel2 = digitalRead(cikel2_pin);
   zavora_odpuscena = digitalRead(zavora_odpuscena_pin);
   home_position_reached = digitalRead(home_position_reached_pin);
+  akd_no_fault = digitalRead(akd_no_fault_pin);
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  if(akd_no_fault == LOW && varnostna_vrata_zaprta == HIGH)
+  {
+    cikel = 3;
+  }
   //////////////////////////////////////////////////////////////////////////////////////////////
   if(kontroliran_stop_tipka == 1)
   {
     digitalWrite(kontroliran_stop_pin, HIGH);
     delay(1000);
     digitalWrite(kontroliran_stop_pin, LOW);
-    cikel = 2;
+    cikel = 3;
   }
   //////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////// DELOVNI CIKEL ///////////////////////////////////////////////////  
   if(cikel == 1 && preklop_ciklov == 0)
   {
-    akd_no_fault = digitalRead(akd_no_fault_pin);
+    
     digitalWrite(zapora_vrat_pin, HIGH);
-    stop_cikla = digitalRead(stop_cikla_pin);
-    startTime = 0;
-    startTime = millis();
-    check_stop_cikla();
-    //////////////////////////////////////////////////////////////
-    if(shranjen_obrat == false)
+    delay(100);
+    if(varnostna_vrata_zaklenjena == HIGH)
     {
-      razlika_obrat = startTime - startTime;
-    }
-    else
-    {
-      razlika_obrat = startTime - nazadnje_obrnjeno;
-    }
-    if(shranjeno_tresenje == false)
-    {
-      razlika_tresenje = startTime - startTime;
-    }
-    else
-    {
-      razlika_tresenje = startTime - nazadnje_treseno;
-    } 
-    if(shranjen_izhod == false)
-    {
-      razlika_izhod = startTime - startTime;
-    }
-    else
-    {
-      razlika_izhod = startTime - nazadnje_izhod;
-    } 
+      akd_no_fault = digitalRead(akd_no_fault_pin);
+      stop_cikla = digitalRead(stop_cikla_pin);
+      startTime = 0;
+      startTime = millis();
+      check_stop_cikla();
+      //////////////////////////////////////////////////////////////
+      if(shranjen_obrat == false)
+      {
+        razlika_obrat = startTime - startTime;
+      }
+      else
+      {
+        razlika_obrat = startTime - nazadnje_obrnjeno;
+      }
+      if(shranjeno_tresenje == false)
+      {
+        razlika_tresenje = startTime - startTime;
+      }
+      else
+      {
+        razlika_tresenje = startTime - nazadnje_treseno;
+      } 
+      if(shranjen_izhod == false)
+      {
+        razlika_izhod = startTime - startTime;
+      }
+      else
+      {
+        razlika_izhod = startTime - nazadnje_izhod;
+      } 
+  
+      if(shranjeno_zapiranje_drce == false)
+      {
+        razlika_zapiranje_drce = startTime - startTime;
+      }
+      else
+      {
+        razlika_zapiranje_drce = startTime - t4;
+      } 
+  
+      if(shranjen_t5 == false)
+      {
+        razlika_t5 = startTime - startTime;
+      }
+      else
+      {
+        razlika_t5 = startTime - t5;
+      } 
+      ////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////
+      if(state == 7)
+      {
+        resetStep();
+      } 
+      if(state == 6)
+      {
+        gripper_odstevalni_senzor = digitalRead(gripper_odstevalni_senzor_pin);
+        zapiranje_drce();
+        gripper_odstevanje();
+        
+      }    
+      if(state == 5)
+      {
+        error_check();
+        konec_tresenja = digitalRead(konec_tresenja_pin);
+        max_position_reached = digitalRead(max_position_reached_pin);
+        stop_motion();
+      }
+      if(state == 4)
+      {
+        prepis_vrednosti();  
+      }
+      if(state == 3)
+      {
+        zacne_tresti();
+      }
+      if(state == 2)
+      {
+        priprava_tresenje();
+      }
+      if (state == 1)
+      {
+        
+        predTresenje();   
+      }
+      if(state == 0)
+      {
+        kolo_vhod_senzor = digitalRead(kolo_vhod_senzor_pin);
+        kolo_izhod_senzor = digitalRead(kolo_izhod_senzor_pin);
+        kolo_obrat_senzor = digitalRead(kolo_obrat_senzor_pin);
+        gripper_stevni_senzor = digitalRead(gripper_stevni_senzor_pin);
+        kolo_vhod_pred_doze_senzor = digitalRead(kolo_vhod_pred_doze_senzor_pin);
+        gripper_doza_postavljena = digitalRead(gripper_doza_postavljena_pin);
+        home_position_tipka = digitalRead(home_position_tipka_pin);
+        home_position_reached = digitalRead(home_position_reached_pin);
+        gripper_stetje();
+        kolo_stetje();
+        obrat_kolesa();
+        pogoji_start();  
 
-    if(shranjeno_zapiranje_drce == false)
-    {
-      razlika_zapiranje_drce = startTime - startTime;
+        // obracanje kolesa vkljucno z spuscanje doz iz gripperja
+        //gripper_odstevalni_senzor = digitalRead(gripper_odstevalni_senzor_pin);
+        //zapiranje_drce();
+        //gripper_odstevanje();
+      }
+      if(state == -1)
+      {
+        preparation_shaking();  
+        //go_home();
+      } 
     }
-    else
-    {
-      razlika_zapiranje_drce = startTime - t4;
-    } 
-
-    if(shranjen_t5 == false)
-    {
-      razlika_t5 = startTime - startTime;
-    }
-    else
-    {
-      razlika_t5 = startTime - t5;
-    } 
-    ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////
-    if(state == 7)
-    {
-      resetStep();
-    } 
-    if(state == 6)
-    {
-      gripper_odstevalni_senzor = digitalRead(gripper_odstevalni_senzor_pin);
-      zapiranje_drce();
-      gripper_odstevanje();
-      
-    }    
-    if(state == 5)
-    {
-      error_check();
-      konec_tresenja = digitalRead(konec_tresenja_pin);
-      max_position_reached = digitalRead(max_position_reached_pin);
-      stop_motion();
-    }
-    if(state == 4)
-    {
-      prepis_vrednosti();  
-    }
-    if(state == 3)
-    {
-      zacne_tresti();
-    }
-    if(state == 2)
-    {
-      priprava_tresenje();
-    }
-    if (state == 1)
-    {
-      
-      predTresenje();   
-    }
-    if(state == 0)
-    {
-      kolo_vhod_senzor = digitalRead(kolo_vhod_senzor_pin);
-      kolo_izhod_senzor = digitalRead(kolo_izhod_senzor_pin);
-      kolo_obrat_senzor = digitalRead(kolo_obrat_senzor_pin);
-      gripper_stevni_senzor = digitalRead(gripper_stevni_senzor_pin);
-      kolo_vhod_pred_doze_senzor = digitalRead(kolo_vhod_pred_doze_senzor_pin);
-      gripper_doza_postavljena = digitalRead(gripper_doza_postavljena_pin);
-      home_position_tipka = digitalRead(home_position_tipka_pin);
-      home_position_reached = digitalRead(home_position_reached_pin);
-      gripper_stetje();
-      kolo_stetje();
-      obrat_kolesa();
-      pogoji_start();  
-    }
-    if(state == -1)
-    {
-      preparation_shaking();  
-      go_home();
-    } 
   }
+    
 
   //////////////////////////////// STOP CIKLA  - mirovanje//////////////////////////
   else if(cikel == 0)
   {
+    
     varnostna_vrata_zaprta = digitalRead(varnostna_vrata_zaprta_pin);
     varnostna_vrata_zaklenjena = digitalRead(varnostna_vrata_zaklenjena_pin);
     debelina_doze1 = digitalRead(debelina_doze1_pin);
@@ -533,30 +552,42 @@ void loop()
     digitalWrite(zapora_drce_pin, LOW);
     digitalWrite(zapora_vrat_pin, LOW);
 
-    if(cikel2 == HIGH)
+    if(cikel2 == HIGH && varnostna_vrata_zaprta == HIGH)
     {
-      cikel = 2;  
+      digitalWrite(zapora_vrat_pin, HIGH);
+      delay(100);
+      if(varnostna_vrata_zaklenjena == HIGH)
+      {
+        cikel = 2;  
+      }
+        
     }    
   }  
   ////////////////////////////////////// DELOVNI CIKEL - brez tresenja //////////////////////////////
   else if(cikel == 1 && preklop_ciklov == 1)
   {
-    kolo_vhod_senzor = digitalRead(kolo_vhod_senzor_pin);
-    kolo_izhod_senzor = digitalRead(kolo_izhod_senzor_pin);
-    kolo_obrat_senzor = digitalRead(kolo_obrat_senzor_pin);
-    akd_no_fault = digitalRead(akd_no_fault_pin);
-    if(prepared != true)
-    {
-      go_home();
-      preparation_no_shaking();
-      prepared = true;
-    }
-    no_tresenje_obrat_kolesa();
-    check_stop_cikla();
+    digitalWrite(zapora_vrat_pin, HIGH);
+    delay(100);
+      if(varnostna_vrata_zaklenjena == HIGH)
+      {
+        kolo_vhod_senzor = digitalRead(kolo_vhod_senzor_pin);
+        kolo_izhod_senzor = digitalRead(kolo_izhod_senzor_pin);
+        kolo_obrat_senzor = digitalRead(kolo_obrat_senzor_pin);
+        akd_no_fault = digitalRead(akd_no_fault_pin);
+        if(prepared != true)
+        {
+          go_home();
+          preparation_no_shaking();
+          prepared = true;
+        }
+        no_tresenje_obrat_kolesa();
+        check_stop_cikla();
+      }
   }
-  //////////////////////////////// ROCNI NACIN - error mode ///////////////////////////////////////////
+  //////////////////////////////// ROCNI NACIN  ///////////////////////////////////////////
   else if(cikel == 2)
   {
+    
     if(varnostna_vrata_zaprta == HIGH)
     {
       digitalWrite(enable_pin, HIGH); 
@@ -564,12 +595,20 @@ void loop()
       home_position_tipka = digitalRead(home_position_tipka_pin);
       odpiranje_gripperja_tipka = digitalRead(odpiranje_gripperja_tipka_pin);
       zapiranje_gripperja_tipka = digitalRead(zapiranje_gripperja_tipka_pin);
+      gripper_manual();
       check_stop_cikla();
       home_position_manual();
-      gripper_manual();
+      
       state = -2;  
     } 
   }
+  //////////////////////////// - error mode ///////////////////////////////////////////////////
+  else if(cikel = 3)
+  {
+    stop_cikla = digitalRead(stop_cikla_pin);
+    check_stop_cikla();
+  }
+  
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////// FUNKCIJE ////////////////////////////////////////////////////////////////////////
@@ -579,7 +618,9 @@ void pogoji_start()
 {  
   if ((kolo_stevec == gripper_stevec && kolo_stevec == doze_number && gripper_stevec == doze_number && gripper_odstevec == 0 && kolo_izhod_senzor == LOW && gripper_doza_postavljena == HIGH) || (kolo_stevec == gripper_stevec && razlika_izhod > timer3 && gripper_odstevec == 0 && ((kolo_stevec > 0) && (kolo_stevec < doze_number) && gripper_doza_postavljena == HIGH)   && kolo_stevec == gripper_stevec && kolo_izhod_senzor == LOW)) 
   {
+    digitalWrite(enable_pin, HIGH);
     state = 1;
+    
   }  
 }
 //////////////////////////////////////////////////////////////////////////STATE 1//////////////////////////////////////////////////////////////////////////////////////
@@ -594,11 +635,13 @@ void priprava_tresenje()
 {
   if(razlika_t5 > timer2)
   {
-      digitalWrite(zapora_drce_pin, HIGH);
-      digitalWrite(zapiranje_gripperja_pin, HIGH);
-      delay(100);
-      digitalWrite(zapiranje_gripperja_pin, LOW);
-      state = 3;
+    digitalWrite(zapiranje_gripperja_pin, HIGH);
+    delay(100);
+    digitalWrite(zapiranje_gripperja_pin, LOW);
+    go_home();
+    delay(1000);      
+    digitalWrite(zapora_drce_pin, HIGH);
+    state = 3;
   }
 }
 ///////////////////////////////////////////////////////////////////STATE 3//////////////////////////////////////////////////////////////////////////////////////
@@ -606,15 +649,20 @@ void zacne_tresti()   // gledam, ce so izpolnjeni pogoji za start tresenja. 1. p
 {
   if(gripper_stevni_senzor == LOW)
   { 
-    delay(100);
-    digitalWrite(start_tresenja_pin, HIGH);
-    delay(10);
-    digitalWrite(start_tresenja_pin, LOW);
-    state = 4; 
+    
+    if(home_position_reached == HIGH)
+    {
+      
+      digitalWrite(start_tresenja_pin, HIGH);
+      delay(100);
+      digitalWrite(start_tresenja_pin, LOW);
+      
+      state = 4;  
+    } 
   }
   else if(gripper_stevni_senzor == HIGH)
   {
-    cikel = 2;         
+    cikel = 3;         
   }
 }
 //////////////////////////////////////////////////////////////////////////STATE 4///////////////////////////////////////////////////////////////////////////////
@@ -636,26 +684,29 @@ void stop_motion()    // izkljucim signal za tresenje, ko konca tresti
 
   if(gripper_stevni_senzor == HIGH)
   {
-    cikel = 2;         
+    cikel = 3;         
   }
   
   if (konec_tresenja == 1)
   {
-    delay(2000);
+    digitalWrite(enable_pin, LOW);
+    
     digitalWrite(zapora_drce_pin, LOW);
     digitalWrite(odpiranje_gripperja_pin, HIGH);
     delay(100);
     digitalWrite(odpiranje_gripperja_pin, LOW);
     delay(100);
+    
     nazadnje_treseno = startTime;
     shranjeno_tresenje = true;
+    
     state = 6;
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////STATE 6//////////////////////////////////////////////////////////////////////////
 void zapiranje_drce ()
 {
-  if(gripper_odstevec == 0)
+  if(gripper_odstevec == 0)   // stresene_doze
   {  
       if(first_time)
       {
@@ -771,10 +822,12 @@ void doze_check()
 ////////////////////////////////////////////////////////////////////////////////
 void go_home()
 {
+  
   delay(100);
   digitalWrite(home_position_pin, HIGH);
   delay(100);
   digitalWrite(home_position_pin, LOW);
+  
 }
 /////////////////////////////////////////////////////////////////////////////
 void gripper_manual()
@@ -801,17 +854,17 @@ void error_check()
     digitalWrite(kontroliran_stop_pin, HIGH);
     delay(100);
     digitalWrite(kontroliran_stop_pin, LOW);
-    cikel = 2;
+    cikel = 3;
   }
   if(max_position_reached == HIGH)
   {
-    cikel = 2;  
+    cikel = 3;  
   }
 }
 /////////////////////////////////////////////////////////////////////////////////
 void home_position_manual()
 {
-  if(home_position_tipka == 1)
+  if(home_position_tipka == 1 && varnostna_vrata_zaprta == HIGH)
   {
     digitalWrite(enable_pin, HIGH);
     digitalWrite(home_position_pin, HIGH);
@@ -827,7 +880,7 @@ void home_position_manual()
 ///////////////////////////////////////////////////////////////////////////////////
 void preparation_shaking()
 {
-  digitalWrite(enable_pin, HIGH);
+  //digitalWrite(enable_pin, HIGH);
   digitalWrite(zapora_drce_pin, HIGH);
   digitalWrite(odpiranje_gripperja_pin, HIGH);
   delay(500);
