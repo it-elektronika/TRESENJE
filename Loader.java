@@ -1,6 +1,8 @@
 package com.it_elektronika.luka.tresenje;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -31,9 +33,16 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import static android.app.PendingIntent.getActivity;
+
 
 public class Loader extends AppCompatActivity {
 
+    public static final String PREFS_NAME = "MyPrefsFile";
+    SharedPreferences settings;
+    private String storedRecName;
+
+    private StatusMonitor statusMonitor;
     private ListView loaderlistview;
     private ArrayList loaderStr;
     private ArrayAdapter loaderadapter;
@@ -65,6 +74,9 @@ public class Loader extends AppCompatActivity {
     private Integer homePos;
     private Intent mintent;
     private Integer cycleValue;
+    private Button sendButton;
+
+
 
     private boolean noConn = false;
 
@@ -78,6 +90,7 @@ public class Loader extends AppCompatActivity {
 
         Log.d("LOADER", "onCreate");
         selectedFromList = "";
+
         myDb = new DataBaseHelper(this);
         transId = 0;
         loaderlistview = (ListView)findViewById(R.id.loaderlistview);
@@ -87,7 +100,7 @@ public class Loader extends AppCompatActivity {
         loaderlistview.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         loaderlistview.setSelector(android.R.color.holo_blue_light);
 
-
+        sendButton = (Button) findViewById(R.id.sendbutton);
         new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -126,7 +139,7 @@ public class Loader extends AppCompatActivity {
                     Log.d("LOADER", "CONNECTION ESTABLISHED");
                 } catch (Exception e)
                 {
-                    Log.d("LOADER", "CONNECTION ERROR", e);
+                    Toast.makeText(getApplicationContext(), "NOT CONNECTED TO DRIVER", Toast.LENGTH_LONG).show();
                 }
                 return null;
             }
@@ -143,11 +156,11 @@ public class Loader extends AppCompatActivity {
         Log.d("LOADER", "onStop");
         try
         {
-            es.close();
+                es.close();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            e.printStackTrace();
+            Log.d("ERROR", "TLE NOTRE");
         }
     }
     @Override
@@ -155,6 +168,11 @@ public class Loader extends AppCompatActivity {
     {
         super.onResume();
         Log.d("LOADER", "onResume");
+
+        settings = getSharedPreferences(PREFS_NAME,MODE_PRIVATE);
+        storedRecName = settings.getString("recept", "NONE");
+        Log.d("STORED REC NAME:", storedRecName);
+
     }
 
 
@@ -312,7 +330,7 @@ public class Loader extends AppCompatActivity {
 
     private void sendData()
     {
-        final Button sendButton = (Button) findViewById(R.id.sendbutton);
+
         sendButton.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v)
@@ -329,7 +347,7 @@ public class Loader extends AppCompatActivity {
 
                     try
                     {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e)
                     {
                         e.printStackTrace();
@@ -339,6 +357,18 @@ public class Loader extends AppCompatActivity {
                     Log.d("before if test:", cycleValue.toString());
                     if(cycleValue == 0)
                     {
+
+                        sendButton.setText("Sending");
+                        invalidateOptionsMenu();
+                        SharedPreferences.Editor e  = settings.edit();
+                        e.putString("recept", selectedFromList);
+                        e.commit();
+                        Log.d("MESSAGE:","SAVING RECIPE NAME");
+
+
+
+
+
                         i = 0;
                         stepCounter = 0;
                         nextMove = 1;
@@ -544,14 +574,17 @@ public class Loader extends AppCompatActivity {
                                 }
                                 homePosition();
                                 publishProgress();
+                                invalidateOptionsMenu();
                                 return null;
                             }
 
                             @Override
                             protected void onProgressUpdate(Void... values)
                             {
+                                sendButton.setText("Send");
                                 Toast.makeText(getApplicationContext(), "SENDING FINISHED", Toast.LENGTH_LONG).show();
                             }
+
                         }.execute();
                     }
                     else
@@ -578,9 +611,13 @@ public class Loader extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        Log.d("LOADER", "ON CREATE OPTIONS MENU");
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.optmenu_load, menu);
+        if(!sendButton.getText().toString().equals("Sending"))
+        {
+            Log.d("LOADER", "ON CREATE OPTIONS MENU");
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.optmenu_load, menu);
+
+        }
         return true;
     }
 
@@ -687,8 +724,6 @@ public class Loader extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
         }
     }
-
-
 }
 
 

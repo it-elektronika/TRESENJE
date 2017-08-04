@@ -1,6 +1,7 @@
 package com.it_elektronika.luka.tresenje;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,10 +20,12 @@ import net.wimpi.modbus.msg.ReadMultipleRegistersResponse;
 import net.wimpi.modbus.net.TCPMasterConnection;
 
 import java.net.InetAddress;
+import java.security.PublicKey;
 
 
 public class StatusMonitor extends AppCompatActivity {
-
+    public static final String PREFS_NAME = "MyPrefsFile";
+    SharedPreferences recipes;
     ////////////////////////////
     private TextView mregst0;
     private TextView mregst1;
@@ -41,6 +44,8 @@ public class StatusMonitor extends AppCompatActivity {
     private TextView mregst14;
     private ImageView cycleStatus;
     private TextView elapsedTime;
+    public TextView sentRecipe;
+
 
     ///////////////////////////////
 
@@ -64,6 +69,9 @@ public class StatusMonitor extends AppCompatActivity {
     private Integer resString17;
     private Integer lastResString17;
     private long resString18;
+    private String resString20;
+    private Loader loader;
+    private String storedRecName;
 
 
     /////////////////////////////////////////////////
@@ -111,11 +119,35 @@ public class StatusMonitor extends AppCompatActivity {
         mregst14 = (TextView) findViewById(R.id.mrt14);
         cycleStatus = (ImageView)findViewById(R.id.cyclestat);
         elapsedTime = (TextView)findViewById(R.id.mrt15);
+        sentRecipe = (TextView)findViewById(R.id.mrt16);
 
 
+        new AsyncTask<Void, Void, Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    addr = InetAddress.getByName("192.168.1.90");
+
+                    con = new TCPMasterConnection(addr);
+                    con.setPort(port);
+                    con.connect();
+                    noConn = false;
+                    Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
+                } catch (Exception e)
+                {
+                    Log.d("STATUS MONITOR", "NO CONNECTION", e);
+                    noConn = true;
+
+                    //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                }
+                return null;
+            }
+        }.execute();
+        Log.d("noConn:", String.valueOf(noConn));
 
         ////////////////////////////////////////////////
-
+        //reconnect();
     }
 
     @Override
@@ -192,29 +224,21 @@ public class StatusMonitor extends AppCompatActivity {
     {
         super.onResume();
         Log.d("STATUS MONITOR", "ON RESUME");
+        //try
+        //{
+            //sentRecipe.setText(loader.settings.getString("recept", "NONE"));
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    addr = InetAddress.getByName("192.168.1.90");
+        //String savedRecipe = loader.settings.getString("recept", "NONE");
+        //Log.d("MESSAGE:",savedRecipe);
+        //}
+        //catch (Exception e)
+        //{
+        //    Log.d("MESSAGE:","CATCH");
+        //}
+        //sentRecipe.setText(loader.storedRecName);
 
-                    con = new TCPMasterConnection(addr);
-                    con.setPort(port);
-                    con.connect();
-                    noConn = false;
-                    Log.d("STATUS MONITOR", "CONNECTION ESTABLISHED");
-                } catch (Exception e)
-                {
-                    Log.d("STATUS MONITOR", "NO CONNECTION", e);
-                    noConn = true;
 
-                    //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
-                }
-                return null;
-            }
-        }.execute();
-        Log.d("noConn:", String.valueOf(noConn));
+
         if (!noConn)
         {
             quitTask = false;
@@ -223,12 +247,11 @@ public class StatusMonitor extends AppCompatActivity {
                 @Override
                 protected Void doInBackground(Void... params)
                 {
-
-
                     while (!quitTask)
                     {
                         if(con.isConnected())
                         {
+
                             int startReg = 0;
 
                             ReadMultipleRegistersRequest req; //the request
@@ -253,8 +276,6 @@ public class StatusMonitor extends AppCompatActivity {
                             }
 
 
-                            //get the response
-
                             res = (ReadMultipleRegistersResponse) trans.getResponse();
                             try
                             {
@@ -277,9 +298,6 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
                                 resString18 = res.getRegister(22).getValue();
-
-
-
                                 ////////////////////////////////////////////////////////////
                             }
                             catch (Exception e)
@@ -372,6 +390,7 @@ public class StatusMonitor extends AppCompatActivity {
                         mregst13.setText(resString13);
 
 
+
                         if (resString14.equals("1")) {
                             mregst14.setText("VELIKA");
                         }
@@ -414,6 +433,13 @@ public class StatusMonitor extends AppCompatActivity {
 
                         elapsedTime.setText(String.valueOf(resString18));
 
+                        recipes = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                        storedRecName = recipes.getString("recept", "NONE");
+                        Log.d("STORED REC NAME:", storedRecName);
+                        sentRecipe.setText(storedRecName);
+
+
+
                     }
                     catch (Exception e)
                     {
@@ -428,8 +454,9 @@ public class StatusMonitor extends AppCompatActivity {
             reconnect();
         }
     }
-    private void reconnect(){
-        while(noConn)
+    private void reconnect()
+    {
+        if(!con.isConnected())
         {
             try
             {
@@ -460,4 +487,5 @@ public class StatusMonitor extends AppCompatActivity {
             }.execute();
         }
     }
+
 }
