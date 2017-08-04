@@ -1,6 +1,5 @@
 package com.it_elektronika.luka.tresenje;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -33,16 +32,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import static android.app.PendingIntent.getActivity;
-
 
 public class Loader extends AppCompatActivity {
 
-    public static final String PREFS_NAME = "MyPrefsFile";
-    SharedPreferences settings;
-    private String storedRecName;
+    private static final String PREFS_NAME = "MyPrefsFile";
+    private SharedPreferences settings;
 
-    private StatusMonitor statusMonitor;
     private ListView loaderlistview;
     private ArrayList loaderStr;
     private ArrayAdapter loaderadapter;
@@ -160,7 +155,7 @@ public class Loader extends AppCompatActivity {
         }
         catch (Exception e)
         {
-            Log.d("ERROR", "TLE NOTRE");
+
         }
     }
     @Override
@@ -170,8 +165,7 @@ public class Loader extends AppCompatActivity {
         Log.d("LOADER", "onResume");
 
         settings = getSharedPreferences(PREFS_NAME,MODE_PRIVATE);
-        storedRecName = settings.getString("recept", "NONE");
-        Log.d("STORED REC NAME:", storedRecName);
+        String storedRecName = settings.getString("recept", "NONE");
 
     }
 
@@ -354,7 +348,7 @@ public class Loader extends AppCompatActivity {
                     }
 
 
-                    Log.d("before if test:", cycleValue.toString());
+
                     if(cycleValue == 0)
                     {
 
@@ -363,7 +357,7 @@ public class Loader extends AppCompatActivity {
                         SharedPreferences.Editor e  = settings.edit();
                         e.putString("recept", selectedFromList);
                         e.commit();
-                        Log.d("MESSAGE:","SAVING RECIPE NAME");
+
 
 
 
@@ -397,7 +391,7 @@ public class Loader extends AppCompatActivity {
                                             byte obuf[] = new byte[261];
                                             byte ibuf[] = new byte[261];
 
-                                            Log.d("I:", String.valueOf(i));
+
                                             //////////////////////////////
                                             ////////// A1 ////////////////
                                             obuf[0] = (byte) (transId >> 8);
@@ -466,7 +460,7 @@ public class Loader extends AppCompatActivity {
                                             try
                                             {
                                                 os.write(obuf, 0, 53);
-                                                Log.d("SEND DATA A1:", "MESSAGE SENT");
+
                                                 transId++;
                                                 stepCounter++;
                                                 nextMove++;
@@ -477,7 +471,7 @@ public class Loader extends AppCompatActivity {
                                             try
                                             {
                                                 is.read(ibuf, 0, 261);
-                                                Log.d("SEND DATA A1:", "MESSAGE RECEIVED");
+
                                             } catch (IOException e)
                                             {
                                                 e.printStackTrace();
@@ -551,7 +545,7 @@ public class Loader extends AppCompatActivity {
                                             try
                                             {
                                                 os.write(obuf, 0, 53);
-                                                Log.d("SEND DATA A2:", "MESSAGE SENT");
+                                                ;
                                                 transId++;
                                                 stepCounter++;
                                                 nextMove++;
@@ -564,7 +558,7 @@ public class Loader extends AppCompatActivity {
                                             try
                                             {
                                                 is.read(ibuf, 0, 261);
-                                                Log.d("SEND DATA A2", "MESSAGE RECEIVED");
+
                                             } catch (IOException e)
                                             {
                                                 e.printStackTrace();
@@ -590,7 +584,7 @@ public class Loader extends AppCompatActivity {
                     else
                     {
                         Toast.makeText(getApplicationContext(), "CANNOT SEND RECIPE WHEN IN CYCLE", Toast.LENGTH_LONG).show();
-                        Log.d("else:", cycleValue.toString());
+
                         mintent = new Intent(Loader.this, StatusMonitor.class);
                         startActivity(mintent);
 
@@ -629,7 +623,7 @@ public class Loader extends AppCompatActivity {
         Intent intent;
         if (i == R.id.back)
         {
-            Log.v("Intent:", item.toString());
+
             intent = new Intent(Loader.this, StatusMonitor.class);
             startActivity(intent);
             return super.onOptionsItemSelected(item);
@@ -662,7 +656,6 @@ public class Loader extends AppCompatActivity {
     private void getResString17()
     {
         //////////////////////////////////////
-        Log.d("noConn:", String.valueOf(noConn));
         if (!noConn)
         {
 
@@ -700,7 +693,6 @@ public class Loader extends AppCompatActivity {
                         {
 
                             cycleValue = res.getRegister(17).getValue();
-                            Log.d("actual:", cycleValue.toString());
                             ////////////////////////////////////////////////////////////
                         }
                         catch (Exception e)

@@ -391,7 +391,6 @@ public class Editor extends AppCompatActivity {
 
                         recName.requestFocus();
                         drawTable();
-                        Log.d("EDITOR___CHEckinG:", recName.getText().toString());
                     }
                 }
         );
@@ -411,7 +410,6 @@ public class Editor extends AppCompatActivity {
                         boolean skipRest4 = false;
                         boolean skipRest5;
                         tableName = recName.getText().toString();
-                        Log.d("RECNAME:", tableName);
                         myDb.getTN(tableName);
                         SQLiteDatabase db = myDb.getWritableDatabase();
 

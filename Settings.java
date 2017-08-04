@@ -223,10 +223,6 @@ public class Settings extends AppCompatActivity {
                             tim2 = res.getRegister(19).getValue();
                             tim3 = res.getRegister(20).getValue();
                             tim4 = res.getRegister(21).getValue();
-                            Log.d("tim1:", String.valueOf(tim1));
-                            Log.d("tim2:", String.valueOf(tim2));
-                            Log.d("tim3:", String.valueOf(tim3));
-                            Log.d("tim3:", String.valueOf(tim3));
                             ////////////////////////////////////////////////////////////
                         }
                         catch (Exception e)
@@ -272,9 +268,7 @@ public class Settings extends AppCompatActivity {
             et2_val = Integer.parseInt(et2.getText().toString());
             et3_val = Integer.parseInt(et3.getText().toString());
             et4_val = Integer.parseInt(et4.getText().toString());
-            Log.d("tim1:", String.valueOf(et1_val));
-            Log.d("tim2:", String.valueOf(et2_val));
-            Log.d("tim3:", String.valueOf(et3_val));
+
         }
         catch(Exception ignored)
         {
@@ -283,7 +277,7 @@ public class Settings extends AppCompatActivity {
     }
     private void getCycleVal() {
         //////////////////////////////////////
-        Log.d("noConn:", String.valueOf(noConn));
+
         if (!noConn)
         {
             new AsyncTask<Void, Void, Void>()
@@ -317,7 +311,7 @@ public class Settings extends AppCompatActivity {
                         try
                         {
                             cycleValue = res.getRegister(17).getValue();
-                            Log.d("actual:", cycleValue.toString());
+
 
                             ////////////////////////////////////////////////////////////
                         } catch (Exception e)
@@ -362,7 +356,7 @@ public class Settings extends AppCompatActivity {
                 {
                     e.printStackTrace();
                 }
-                Log.d("CYCLE VAL:", cycleValue.toString());
+
                 if(cycleValue.equals(0))
                 {
                     Log.d("SAVE_DATA", "ONCLICK");
@@ -419,7 +413,7 @@ public class Settings extends AppCompatActivity {
                 else
                 {
                     Toast.makeText(getApplicationContext(), "CANNOT CHANGE VALUES WHEN IN CYCLE", Toast.LENGTH_LONG).show();
-                    Log.d("else:", cycleValue.toString());
+
                     mintent = new Intent(Settings.this, StatusMonitor.class);
                     startActivity(mintent);
                 }

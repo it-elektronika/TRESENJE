@@ -24,8 +24,8 @@ import java.security.PublicKey;
 
 
 public class StatusMonitor extends AppCompatActivity {
-    public static final String PREFS_NAME = "MyPrefsFile";
-    SharedPreferences recipes;
+    private static final String PREFS_NAME = "MyPrefsFile";
+    private SharedPreferences recipes;
     ////////////////////////////
     private TextView mregst0;
     private TextView mregst1;
@@ -44,7 +44,7 @@ public class StatusMonitor extends AppCompatActivity {
     private TextView mregst14;
     private ImageView cycleStatus;
     private TextView elapsedTime;
-    public TextView sentRecipe;
+    private TextView sentRecipe;
 
 
     ///////////////////////////////
@@ -69,8 +69,6 @@ public class StatusMonitor extends AppCompatActivity {
     private Integer resString17;
     private Integer lastResString17;
     private long resString18;
-    private String resString20;
-    private Loader loader;
     private String storedRecName;
 
 
@@ -138,13 +136,11 @@ public class StatusMonitor extends AppCompatActivity {
                 {
                     Log.d("STATUS MONITOR", "NO CONNECTION", e);
                     noConn = true;
-
-                    //Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
                 }
                 return null;
             }
         }.execute();
-        Log.d("noConn:", String.valueOf(noConn));
+
 
         ////////////////////////////////////////////////
         //reconnect();
@@ -224,20 +220,6 @@ public class StatusMonitor extends AppCompatActivity {
     {
         super.onResume();
         Log.d("STATUS MONITOR", "ON RESUME");
-        //try
-        //{
-            //sentRecipe.setText(loader.settings.getString("recept", "NONE"));
-
-        //String savedRecipe = loader.settings.getString("recept", "NONE");
-        //Log.d("MESSAGE:",savedRecipe);
-        //}
-        //catch (Exception e)
-        //{
-        //    Log.d("MESSAGE:","CATCH");
-        //}
-        //sentRecipe.setText(loader.storedRecName);
-
-
 
         if (!noConn)
         {
@@ -420,7 +402,7 @@ public class StatusMonitor extends AppCompatActivity {
                             }
                         }
 
-                        else if(resString17.equals(2))
+                        else if(resString17.equals(2) || resString17.equals(3))
                         {
                             cycleStatus.setImageResource(R.drawable.red);
                             if(!resString17.equals(lastResString17))
@@ -460,7 +442,7 @@ public class StatusMonitor extends AppCompatActivity {
         {
             try
             {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
             catch (InterruptedException e)
             {

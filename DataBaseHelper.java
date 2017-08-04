@@ -23,8 +23,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db){
-        //db.execSQL(" CREATE TABLE default (ID INTEGER PRIMARY KEY AUTOINCREMENT, ANGLE1 INTEGER, ANGLE2 INTEGER, VELOCITY INTEGER, ACCELERATION INTEGER, DECCELERATION INTEGER, DELAY INTEGER, EXECUTION INTEGER);");
-        //Log.v("TABLE CREATED:", TABLE_NAME);
     }
 
     @Override
@@ -48,19 +46,15 @@ class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     public void tableCheck(){
-        Log.d("function:", "tablexists");
-
         tableExists = false;
         SQLiteDatabase db = this.getWritableDatabase();
 
         if ((DatabaseUtils.queryNumEntries(db, TABLE_NAME)) < 1)
         {
-            Log.d("number of rows:", String.valueOf(DatabaseUtils.queryNumEntries(db, TABLE_NAME)));
             tableExists = false;
         }
         else
-        {
-            Log.d("number of rows:", String.valueOf(DatabaseUtils.queryNumEntries(db, TABLE_NAME)));
+        {;
             tableExists = true;
         }
     }
@@ -68,7 +62,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
     public void insertData(Integer idcount, Integer angle1, Integer angle2, Integer velocity, Integer acceleration, Integer decceleration, Integer delay, Integer execution){
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Log.d("TABLE EXISTS:", String.valueOf(tableExists));
         ContentValues contentValues = new ContentValues();
         contentValues.put("ANGLE1", angle1);
         contentValues.put("ANGLE2", angle2);
@@ -80,7 +73,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
         long result;
 
         result = db.insert(TABLE_NAME, null,contentValues);
-        Log.d("message", "Inserting values");
     }
 
     public void updateData(Integer idcount, Integer angle1, Integer angle2, Integer velocity, Integer acceleration, Integer decceleration, Integer delay, Integer execution){
@@ -98,10 +90,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
         contentValues.put("EXECUTION", execution);
 
         db.update(TABLE_NAME, contentValues, "ID = ?", new String[]{String.valueOf(idcount)});
-        Log.d("message", String.valueOf(angle1));
-        Log.d("message", String.valueOf(idcount));
-        Log.d("message", "Updating values");
-
     }
 
 
@@ -123,14 +111,8 @@ class DataBaseHelper extends SQLiteOpenHelper {
                     countYData++;
 
                 }
-
-                Log.d("outer", "end of iteration");
                 res.moveToNext();
             }
-        }
-        for (int i = 0; i < 70; ++i)
-        {
-            Log.d("ydata:", String.valueOf(yData[i]));
         }
         res.close();
     }
@@ -156,7 +138,6 @@ class DataBaseHelper extends SQLiteOpenHelper {
 
     public void deleteTable(){
         SQLiteDatabase db = this.getWritableDatabase();
-        Log.d("table to be deleted:", TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 
     }

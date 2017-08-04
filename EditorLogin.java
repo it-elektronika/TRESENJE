@@ -35,7 +35,6 @@ public class EditorLogin extends AppCompatActivity {
 
                 if(editText.getText().toString().equals(pass))
                 {
-                    Log.d("EDITOR LOGIN", "LOGIN PRESSED");
                     startActivity(intent);
                 }
                 else
