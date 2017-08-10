@@ -112,7 +112,6 @@ public class Editor extends AppCompatActivity {
 
         leftBarSup.addView(recLabel);
 
-
         recName = new EditText(this);
         recName.setTextSize(25);
         recName.setSingleLine();
@@ -123,7 +122,6 @@ public class Editor extends AppCompatActivity {
         recName.setFocusableInTouchMode(false);
 
         leftBarSup.addView(recName);
-
 
         newrec = new Button(this);
         newrec.setText(R.string.neww);
@@ -420,7 +418,7 @@ public class Editor extends AppCompatActivity {
                             if(!Character.isAlphabetic(recName.getText().charAt(i)))
                             {
                                 skipRest1 = true;
-                                Toast.makeText(getApplicationContext(), "USE ONLY NUMBERS AND LETTERS FOR RECIPE NAME", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "USE ONLY LETTERS FOR RECIPE NAME", Toast.LENGTH_LONG).show();
                                 break;
                             }
                             else

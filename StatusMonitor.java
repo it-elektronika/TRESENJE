@@ -52,6 +52,7 @@ public class StatusMonitor extends AppCompatActivity {
     private String resString0;
     private String resString1;
     private String resString2;
+    private String lastResString2;
     private String resString3;
     private String resString4;
     private String resString5;
@@ -113,12 +114,12 @@ public class StatusMonitor extends AppCompatActivity {
         mregst10 = (TextView) findViewById(R.id.mrt10);
         mregst11 = (TextView) findViewById(R.id.mrt11);
         mregst12 = (TextView) findViewById(R.id.mrt12);
-        mregst13 = (TextView) findViewById(R.id.mrt13);
+        //mregst13 = (TextView) findViewById(R.id.mrt13);
         mregst14 = (TextView) findViewById(R.id.mrt14);
         cycleStatus = (ImageView)findViewById(R.id.cyclestat);
         elapsedTime = (TextView)findViewById(R.id.mrt15);
         sentRecipe = (TextView)findViewById(R.id.mrt16);
-
+        lastResString2 = "99";
 
         new AsyncTask<Void, Void, Void>()
         {
@@ -151,7 +152,7 @@ public class StatusMonitor extends AppCompatActivity {
     {
         try
         {
-            if(resString17.equals(0))
+            if(resString17.equals(0) && resString2.equals("0"))
             {
                 Log.d("STATUS MONITOR", "ON CREATE OPTIONS MENU");
                 MenuInflater inflater = getMenuInflater();
@@ -240,7 +241,7 @@ public class StatusMonitor extends AppCompatActivity {
                             ReadMultipleRegistersResponse res; //the response
 
                             // Prepare the request
-                            req = new ReadMultipleRegistersRequest(startReg, 23);
+                            req = new ReadMultipleRegistersRequest(startReg, 24);
 
                             // Prepare the transaction
                             trans = new ModbusTCPTransaction(con);
@@ -279,7 +280,7 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString15 = String.valueOf(res.getRegister(15).getValue());
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
-                                resString18 = res.getRegister(22).getValue();
+                                resString18 = res.getRegister(23).getValue();
                                 ////////////////////////////////////////////////////////////
                             }
                             catch (Exception e)
@@ -313,7 +314,7 @@ public class StatusMonitor extends AppCompatActivity {
                             mregst1.setText("ODKLENJENA");
                         }
 
-                        if (resString2.equals("0")) {
+                        if (resString2.equals("1")) {
                             mregst2.setText("ERROR");
                         } else {
                             mregst2.setText("OK");
@@ -369,7 +370,7 @@ public class StatusMonitor extends AppCompatActivity {
 
                         mregst11.setText(resString11);
                         mregst12.setText(resString12);
-                        mregst13.setText(resString13);
+                        //mregst13.setText(resString13);
 
 
 
@@ -411,6 +412,12 @@ public class StatusMonitor extends AppCompatActivity {
                             }
                         }
 
+                        if(!lastResString2.equals(resString2))
+                        {
+                            invalidateOptionsMenu();
+                        }
+
+                        lastResString2 = resString2;
                         lastResString17 = resString17;
 
                         elapsedTime.setText(String.valueOf(resString18));

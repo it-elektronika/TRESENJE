@@ -42,18 +42,29 @@ public class Settings extends AppCompatActivity {
     private EditText et2;
     private EditText et3;
     private EditText et4;
+    private EditText et5;
 
     private Integer tim1;
     private Integer tim2;
     private Integer tim3;
     private Integer tim4;
+    private Integer tim5;
+
 
     private Integer et1_val;
     private Integer et2_val;
     private Integer et3_val;
     private Integer et4_val;
+    private Integer et5_val;
 
     private Integer cycleValue;
+
+    private boolean check1;
+    private boolean check2;
+    private boolean check3;
+    private boolean check4;
+    private boolean check5;
+    private boolean checkall;
 
 
     private Intent mintent;
@@ -69,10 +80,14 @@ public class Settings extends AppCompatActivity {
         et2 = (EditText) findViewById(R.id.cas_do_zacetka_tresenjaET);
         et3 = (EditText) findViewById(R.id.cas_do_nepolnega_tresenjaET);
         et4 = (EditText) findViewById(R.id.zapiranje_gripperjaET);
+        et5 = (EditText) findViewById(R.id.spuscanje_dozET);
+
         et1_val = 99;
         et2_val = 99;
         et3_val = 99;
         et4_val = 99;
+        et5_val = 99;
+
         new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -125,6 +140,15 @@ public class Settings extends AppCompatActivity {
         });
 
         et4.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et5.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 v.setFocusable(true);
@@ -202,7 +226,7 @@ public class Settings extends AppCompatActivity {
                         ReadMultipleRegistersRequest req; //the request
                         ReadMultipleRegistersResponse res; //the response
 
-                        req = new ReadMultipleRegistersRequest(startReg, 22);
+                        req = new ReadMultipleRegistersRequest(startReg, 25);
 
                         trans = new ModbusTCPTransaction(con);
                         trans.setRequest(req);
@@ -223,6 +247,7 @@ public class Settings extends AppCompatActivity {
                             tim2 = res.getRegister(19).getValue();
                             tim3 = res.getRegister(20).getValue();
                             tim4 = res.getRegister(21).getValue();
+                            tim5 = res.getRegister(22).getValue();
                             ////////////////////////////////////////////////////////////
                         }
                         catch (Exception e)
@@ -245,6 +270,8 @@ public class Settings extends AppCompatActivity {
                         et2.setText(String.valueOf(tim2));
                         et3.setText(String.valueOf(tim3));
                         et4.setText(String.valueOf(tim4));
+                        et5.setText(String.valueOf(tim5));
+                        Log.d("settext",String.valueOf(tim5));
                     }
                     catch (Exception e)
                     {
@@ -268,7 +295,67 @@ public class Settings extends AppCompatActivity {
             et2_val = Integer.parseInt(et2.getText().toString());
             et3_val = Integer.parseInt(et3.getText().toString());
             et4_val = Integer.parseInt(et4.getText().toString());
+            et5_val = Integer.parseInt(et5.getText().toString());
+            Log.d("settext",String.valueOf(et5));
 
+            if (et1_val > -1 && et1_val < 256)
+            {
+                check1 = true;
+            }
+            else
+            {
+                check1 = false;
+                Toast.makeText(getApplicationContext(), "INCORRECT TIMER VALUE (valid range is: 0 - 255)", Toast.LENGTH_LONG).show();
+            }
+
+            if (et2_val > -1 && et2_val < 256)
+            {
+                check2 = true;
+            }
+            else
+            {
+                check2 = false;
+                Toast.makeText(getApplicationContext(), "INCORRECT TIMER VALUE (valid range is: 0 - 255)", Toast.LENGTH_LONG).show();
+            }
+
+            if (et3_val > -1 && et3_val < 256)
+            {
+                check3 = true;
+            }
+            else
+            {
+                check3 = false;
+                Toast.makeText(getApplicationContext(), "INCORRECT TIMER VALUE (valid range is: 0 - 255)", Toast.LENGTH_LONG).show();
+            }
+
+            if (et4_val > -1 && et4_val < 256)
+            {
+                check4 = true;
+            }
+            else
+            {
+                check4 = false;
+                Toast.makeText(getApplicationContext(), "INCORRECT TIMER VALUE (valid range is: 0 - 255)", Toast.LENGTH_LONG).show();
+            }
+
+            if (et5_val > -1 && et5_val < 256)
+            {
+                check5 = true;
+            }
+            else
+            {
+                check5 = false;
+                Toast.makeText(getApplicationContext(), "INCORRECT TIMER VALUE (valid range is: 0 - 255)", Toast.LENGTH_LONG).show();
+            }
+
+            if(check1 && check2 && check3 && check4 && check5)
+            {
+                checkall = true;
+            }
+            else
+            {
+                checkall = true;
+            }
         }
         catch(Exception ignored)
         {
@@ -359,55 +446,51 @@ public class Settings extends AppCompatActivity {
 
                 if(cycleValue.equals(0))
                 {
-                    Log.d("SAVE_DATA", "ONCLICK");
+                    if (checkall) {
+                        Log.d("SAVE_DATA", "ONCLICK");
 
-                    if (!noConn)
-                    {
-                        new AsyncTask<Void, Void, Void>()
-                        {
-                            @Override
-                            protected Void doInBackground(Void... params)
+                        if (!noConn) {
+                            new AsyncTask<Void, Void, Void>()
                             {
-                                if(con.isConnected())
+                                @Override
+                                protected Void doInBackground(Void... params)
                                 {
-                                    int startReg = 18;
+                                    if (con.isConnected()) {
+                                        int startReg = 18;
 
-                                    WriteMultipleRegistersRequest req;
-                                    WriteMultipleRegistersResponse res = null;
+                                        WriteMultipleRegistersRequest req;
+                                        WriteMultipleRegistersResponse res = null;
 
-                                    SimpleRegister[] hr = new SimpleRegister[4];
+                                        SimpleRegister[] hr = new SimpleRegister[5];
 
-                                    hr[0]=new SimpleRegister(et1_val);
-                                    hr[1]=new SimpleRegister(et2_val);
-                                    hr[2]=new SimpleRegister(et3_val);
-                                    hr[3]=new SimpleRegister(et4_val);
+                                        hr[0] = new SimpleRegister(et1_val); //
+                                        hr[1] = new SimpleRegister(et2_val);
+                                        hr[2] = new SimpleRegister(et3_val);
+                                        hr[3] = new SimpleRegister(et4_val);
+                                        hr[4] = new SimpleRegister(et5_val);
 
-                                    req = new WriteMultipleRegistersRequest(startReg, hr);
+                                        req = new WriteMultipleRegistersRequest(startReg, hr);
 
-                                    trans = new ModbusTCPTransaction(con);
-                                    trans.setRequest(req);
+                                        trans = new ModbusTCPTransaction(con);
+                                        trans.setRequest(req);
 
-                                    try
-                                    {
-                                        trans.execute();
+                                        try
+                                        {
+                                            trans.execute();
+                                        } catch (ModbusException e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+
+                                        res = (WriteMultipleRegistersResponse) trans.getResponse();
                                     }
-                                    catch (ModbusException e)
-                                    {
-                                        e.printStackTrace();
-                                    }
-
-                                    res = (WriteMultipleRegistersResponse) trans.getResponse();
-
-
+                                    return null;
                                 }
-                                return null;
-                            }
-                        }.execute();
-                        Toast.makeText(getApplicationContext(), "SETTINGS SAVED", Toast.LENGTH_LONG).show();
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                            }.execute();
+                            Toast.makeText(getApplicationContext(), "SETTINGS SAVED", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "NO CONNECTION TO PLC", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
                 else
@@ -417,7 +500,6 @@ public class Settings extends AppCompatActivity {
                     mintent = new Intent(Settings.this, StatusMonitor.class);
                     startActivity(mintent);
                 }
-
             }
         });
     }
