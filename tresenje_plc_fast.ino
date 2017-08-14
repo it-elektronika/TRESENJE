@@ -221,6 +221,7 @@ void setup() {
   Mb.R[21]; 
   Mb.R[22];
   Mb.R[23];
+  Mb.R[24];
   ////////////////////////////////////////////////////////////////////////////////////////
   Serial.println("WELCOME");// zacni serial komunikacijo. zaradi izpisovanja vrednosti 
   pinMode(stop_total_pin, INPUT);
@@ -338,7 +339,8 @@ void loop()
   //Mb.R[19]
   //Mb.R[20]
   //Mb.R[21]
-  Mb.R[23] = razlika_tresenje/60000;
+  Mb.R[23] = razlika_tresenje/1000;
+  Mb.R[24] = gripper_doza_postavljena;
   
   
   
