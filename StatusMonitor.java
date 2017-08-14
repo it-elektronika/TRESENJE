@@ -45,6 +45,7 @@ public class StatusMonitor extends AppCompatActivity {
     private ImageView cycleStatus;
     private TextView elapsedTime;
     private TextView sentRecipe;
+    private TextView mregst18;
 
 
     ///////////////////////////////
@@ -71,6 +72,7 @@ public class StatusMonitor extends AppCompatActivity {
     private Integer lastResString17;
     private long resString18;
     private String storedRecName;
+    private String resString19;
 
 
     /////////////////////////////////////////////////
@@ -119,6 +121,7 @@ public class StatusMonitor extends AppCompatActivity {
         cycleStatus = (ImageView)findViewById(R.id.cyclestat);
         elapsedTime = (TextView)findViewById(R.id.mrt15);
         sentRecipe = (TextView)findViewById(R.id.mrt16);
+        mregst18 = (TextView)findViewById(R.id.mrt17);
         lastResString2 = "99";
 
         new AsyncTask<Void, Void, Void>()
@@ -241,7 +244,7 @@ public class StatusMonitor extends AppCompatActivity {
                             ReadMultipleRegistersResponse res; //the response
 
                             // Prepare the request
-                            req = new ReadMultipleRegistersRequest(startReg, 24);
+                            req = new ReadMultipleRegistersRequest(startReg, 25);
 
                             // Prepare the transaction
                             trans = new ModbusTCPTransaction(con);
@@ -281,6 +284,7 @@ public class StatusMonitor extends AppCompatActivity {
                                 resString16 = String.valueOf(res.getRegister(16).getValue());
                                 resString17 = res.getRegister(17).getValue();
                                 resString18 = res.getRegister(23).getValue();
+                                resString19 = String.valueOf(res.getRegister(24).getValue());
                                 ////////////////////////////////////////////////////////////
                             }
                             catch (Exception e)
@@ -345,9 +349,9 @@ public class StatusMonitor extends AppCompatActivity {
                         }
 
                         if (resString7.equals("1")) {
-                            mregst7.setText("ZAPRT");
+                            mregst7.setText("ZAPRTA");
                         } else {
-                            mregst7.setText("ODPRT");
+                            mregst7.setText("ODPRTA");
                         }
 
                         if (resString8.equals("1")) {
@@ -375,15 +379,15 @@ public class StatusMonitor extends AppCompatActivity {
 
 
                         if (resString14.equals("1")) {
-                            mregst14.setText("VELIKA");
+                            mregst14.setText("VELIKA (18)");
                         }
                         else if (resString15.equals("1"))
                         {
-                            mregst14.setText("SREDNJA");
+                            mregst14.setText("SREDNJA (20)");
                         }
                         else if (resString16.equals("1"))
                         {
-                            mregst14.setText("MALA");
+                            mregst14.setText("MALA (22)");
                         }
 
                         if (resString17.equals(1))
@@ -415,6 +419,15 @@ public class StatusMonitor extends AppCompatActivity {
                         if(!lastResString2.equals(resString2))
                         {
                             invalidateOptionsMenu();
+                        }
+
+
+                        if(resString19.equals("1"))
+                        {
+                            mregst18.setText("DA");
+                        }
+                        else{
+                            mregst18.setText("NE");
                         }
 
                         lastResString2 = resString2;
