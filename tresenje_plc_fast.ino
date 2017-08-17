@@ -1061,7 +1061,7 @@ void obrat_kolesa()
       {
         praznenje = false;
         digitalWrite(obracanje_dozirnega_kolesa_pin, LOW); 
-        digitalWrite(praznenje_pin, LOW);
+        //digitalWrite(praznenje_pin, LOW);
       }
     }
   }
