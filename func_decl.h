@@ -31,5 +31,11 @@ void gotoAdmin(void);
 void loadPage(int pageNumber);
 void passCheck(void);
 void drawGrid(void);
+void drawVarBar(void);
+void drawTextBox(int x, int y, int w, int h, const char *text);
+
+
+
+
 
 #endif

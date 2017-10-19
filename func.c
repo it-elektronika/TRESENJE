@@ -9,10 +9,10 @@ int adminAccess = 0;
 int cycleCounter = 0;
 extern int pageNumber;
 int menuValueCheck = 0; 
-
+int hasFocus = 0;
 char text1[10];
 char text2[10];
-
+char editText[5];
 
 int PiControlHandle_g = -1;
 int SCREEN_WIDTH = 1280;
@@ -30,6 +30,7 @@ const char *enteredText;
 const char *pageTitles[7];
 const char *inputLabels[14];
 const char *outputLabels[14];
+const char *grid[6][7];
 
 char* n_num[10];
 char * var_num[8];
@@ -50,6 +51,32 @@ SDL_Texture *texture = NULL;
 TTF_Font *textFont = NULL; 
 SDL_Point touchLocation = {-1, -1};
 
+
+struct editBox
+{
+  int x;
+  int y;
+  int w;
+  int h;
+  int xa1;
+  int ya1;
+  int xa2;
+  int ya2;
+  int xb1;
+  int yb1;
+  int xb2;
+  int yb2;
+  int xc1;
+  int yc1;
+  int xc2;
+  int yc2;
+  int xd1;
+  int yd1;
+  int xd2;
+  int yd2;
+  char editText[10];
+  int editBox_id;
+};
 
 int init()
 { 
@@ -90,7 +117,6 @@ int init()
   }
   return 15;
 }
-
 
 void freeTexture(void)
 {
@@ -166,10 +192,7 @@ void draw(void)
 {
   SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
   SDL_RenderClear(renderer);
-
-  
 }
-
 
 void drawMenu(void)
 {
@@ -192,9 +215,9 @@ void close()
   SDL_Quit();
 }
 
-
 void initVars()
 {
+  struct editBox editbox[];
   n_num[0] = "1";
   n_num[1] = "2";
   n_num[2] = "3";
@@ -214,10 +237,6 @@ void initVars()
   var_num[5] = "DEC.";
   var_num[6] = "DLY";
   var_num[7] = "RPT.";
-
-
-
-
 
   i_num[0] = "I_1";  
   i_num[1] = "I_2"; 
@@ -314,7 +333,6 @@ void toggleOutput(char *io_num, int io_n, int x1, int x2, int y1, int y2)
   }	  
 }
 
-
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
   SDL_Rect renderQuad = { x, y, textureWidth, textureHeight};
@@ -373,7 +391,6 @@ void writeVariables()
   }
 }
 
-
 void drawPageTitle(int pageNumber)
 {
   SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
@@ -390,8 +407,6 @@ void drawPageTitle(int pageNumber)
   render(50, 25, NULL, 0.0, NULL, SDL_FLIP_NONE);
   
 }
-
-
 
 void openMenu()
 {
@@ -475,7 +490,6 @@ void timestampRefresh(void)
   oldtimestamp = timestamp;
 }
 
-
 void refreshTouch(void)
 {
   enteredText = ""; 
@@ -523,8 +537,6 @@ void cycleCount()
 {
   cycleCounter++;
 }
-
-
 
 void drawMenuItems(void)
 {
@@ -602,27 +614,9 @@ void page_statusIO(void)
 
 void page_editor(void)
 {
-  int y = 175;
-  int x = 50;
   draw();
   drawMenu();
   drawPageTitle(pageNumber); 
-  
- // for(int i = 0; i < 8; ++i)
- // {
- //   writeText(var_num[i], textColor);
- //   render(x, 100, NULL, 0.0, NULL, SDL_FLIP_NONE);
- //   x = x + 125;
- // }
-
- // for(int i = 0; i < 10; ++i)
- // {
- //   writeText(n_num[i], textColor);
-//    render(50, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
- //   y = y + 100;
- // }
- // y = 175;
- // x = 50;
   drawGrid();
   if(adminAccess == 1)
   {
@@ -630,6 +624,7 @@ void page_editor(void)
     closeMenu();
   }
 }
+
 void page_loader(void)
 {
   draw();
@@ -641,6 +636,7 @@ void page_loader(void)
     closeMenu();
   }
 }
+
 void page_settings(void)
 {
   draw();
@@ -678,11 +674,6 @@ void loadPage(int pageNumber)
   }
   
   SDL_RenderPresent(renderer); 
- // printf("X: %d\n", touchLocation.x);
- // printf("Y: %d\n", touchLocation.y);
- // printf("########################\n");
- // printf("TS: %d\n", timestamp);
- // printf("OTS: %d\n", oldtimestamp);
 }
 
 
@@ -702,40 +693,101 @@ void passCheck(void)
   }
 }
 
-
-
-
 void drawGrid()
 { 
   int x = 50;
-  int y = 200;
+  int y = 100;
+  int w = 125;
+  int h = 100;
+  for(int i = 0; i < 6; ++i)
+  {
+    for(int j = 0; j < 7; ++j)
+    {
+      drawTextBox(x, y, w, h, editText);
+      x = x + w;
+    }
+    x = 50;
+    y = y + h;  
+  }
+  x = 50;
+  y = 100;
+}
 
 
-
-  SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
-
-  SDL_RenderDrawLine(renderer, 50, 75, 50, 200);
-  SDL_RenderDrawLine(renderer, 710, 75, 710, 200);
-  SDL_RenderDrawLine(renderer, 1205, 75, 1205, 200);
-
-
-
-  SDL_RenderDrawLine(renderer, 380, 75, 380, 200);
-
+void drawVarBar(void)
+{
+  int y = 300;
+  int x = 25;
   
   for(int i = 0; i < 8; ++i)
   {
-    SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
-    SDL_RenderDrawLine(renderer, 50, y, 1205, y);
-    y = y + 75; 
+    writeText(var_num[i], textColor);
+    render(x, 200, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    x = x + 150;
   }
-  y = 200;
 
-  for(int i = 0; i < 11; ++i)
+  for(int i = 0; i < 10; ++i)
   {
-    SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
-    SDL_RenderDrawLine(renderer, x, 200, x, 725);
-    x = x + 165; 
+    writeText(n_num[i], textColor);
+    render(25, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+   y = y + 75;
   }
-  x = 50;
+  y = 300;
+  x = 25;
+}
+
+void drawTextBox(int x, int y, int w, int h, const char *text)
+{
+  int padx = 50;
+  int pady = 50;
+  SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
+  SDL_RenderDrawLine(renderer, x, y, (x+w), y);
+  SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
+  SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
+  SDL_RenderDrawLine(renderer, x, (y+h), x, y);
+
+  writeText(text, textColor);
+  render((x+padx), (y+pady), NULL, 0.0, NULL, SDL_FLIP_NONE);
+  if(touchLocation.x >= x && touchLocation.y <= y && timestamp > oldtimestamp && cycleCounter != menuValueCheck) 
+  {
+    menuValueCheck = cycleCounter;
+    hasFocus = 1;
+
+    while(SDL_PollEvent(&evt) != 0 )
+    {
+      if(evt.type == SDL_TEXTINPUT)
+      {
+        strcat(editText, evt.text.text);
+      }
+      if(evt.type = SDL_KEYDOWN)
+      {
+        if(evt.key.keysym.sym == SDLK_BACKSPACE && strlen(editText) > 0)
+        {
+          editText[strlen(editText) - 1] = 0;
+        }
+      }
+    }
+  }
+}
+
+void instTextBoxGrid()
+{
+  for(int i = 0; i < 6; ++i)
+  {
+    for(int j = 0; j < 7; ++j)
+    {
+      instTextBox(x, y, w, h, id_counter);
+      
+    }
+  }
+}
+
+void instTextBox(int x, int y, int w, int h, int id_counter)
+{
+  strcpy(editbox[i].x, x);
+  strcpy(editbox[i].y  y);
+  strcpy(editbox[i].w, w);
+  strcpy(editbox[i].h, h);
+  strcpy(editbox[i].editBox_id, id_counter);
+  id_counter++; 
 }
