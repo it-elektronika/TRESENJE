@@ -13,6 +13,8 @@ int hasFocus = 0;
 char text1[10];
 char text2[10];
 char editText[5];
+char editBox_id[6][7];
+int editBox_id_counter = 1;
 
 int PiControlHandle_g = -1;
 int SCREEN_WIDTH = 1280;
@@ -50,33 +52,6 @@ SDL_Window *window = NULL;
 SDL_Texture *texture = NULL;
 TTF_Font *textFont = NULL; 
 SDL_Point touchLocation = {-1, -1};
-
-
-struct editBox
-{
-  int x;
-  int y;
-  int w;
-  int h;
-  int xa1;
-  int ya1;
-  int xa2;
-  int ya2;
-  int xb1;
-  int yb1;
-  int xb2;
-  int yb2;
-  int xc1;
-  int yc1;
-  int xc2;
-  int yc2;
-  int xd1;
-  int yd1;
-  int xd2;
-  int yd2;
-  char editText[10];
-  int editBox_id;
-};
 
 int init()
 { 
@@ -217,7 +192,6 @@ void close()
 
 void initVars()
 {
-  struct editBox editbox[];
   n_num[0] = "1";
   n_num[1] = "2";
   n_num[2] = "3";
@@ -477,11 +451,11 @@ void closeMenu(void)
   if(touchLocation.x >= 1205 && touchLocation.y <= 75 && timestamp > oldtimestamp && menuOpened == 1 && cycleCounter != menuValueCheck) 
   { 
     menuOpened = 0;
-    printf("MENU CLOSE: %d\n", menuOpened);
-    printf("TS: %d\n", timestamp);
-    printf("TSOLD: %d\n", oldtimestamp);
-    printf("MENUVALUECHECK: %d\n", menuValueCheck);
-    printf("CYCLECOUNTER: %d\n", cycleCounter);
+ //   printf("MENU CLOSE: %d\n", menuOpened);
+ //   printf("TS: %d\n", timestamp);
+ //   printf("TSOLD: %d\n", oldtimestamp);
+ //   printf("MENUVALUECHECK: %d\n", menuValueCheck);
+ //   printf("CYCLECOUNTER: %d\n", cycleCounter);
   }
 }
 
@@ -695,6 +669,7 @@ void passCheck(void)
 
 void drawGrid()
 { 
+  editBox_id_counter = 1;
   int x = 50;
   int y = 100;
   int w = 125;
@@ -705,13 +680,16 @@ void drawGrid()
     {
       drawTextBox(x, y, w, h, editText);
       x = x + w;
+      editBox_id[i][j] = editBox_id_counter;
+      editBox_id_counter++;
+   //   printf("editbox_id[%d][%d]: %d\n",i, j,editBox_id[i][j],editBox_id_counter);
     }
     x = 50;
     y = y + h;  
   }
   x = 50;
   y = 100;
-}
+  }
 
 
 void drawVarBar(void)
@@ -740,19 +718,24 @@ void drawTextBox(int x, int y, int w, int h, const char *text)
 {
   int padx = 50;
   int pady = 50;
-  SDL_SetRenderDrawColor(renderer, 0x50, 0x50, 0xFF, 0xFF);
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
   SDL_RenderDrawLine(renderer, x, y, (x+w), y);
   SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
   SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
   SDL_RenderDrawLine(renderer, x, (y+h), x, y);
 
-  writeText(text, textColor);
-  render((x+padx), (y+pady), NULL, 0.0, NULL, SDL_FLIP_NONE);
-  if(touchLocation.x >= x && touchLocation.y <= y && timestamp > oldtimestamp && cycleCounter != menuValueCheck) 
+  //writeText(text, textColor);
+  //render((x+padx), (y+pady), NULL, 0.0, NULL, SDL_FLIP_NONE);
+  if(touchLocation.x >= x &&  touchLocation.x < (x + w) && touchLocation.y >= y && touchLocation.y < (y + h) && timestamp > oldtimestamp && cycleCounter != menuValueCheck) 
   {
     menuValueCheck = cycleCounter;
     hasFocus = 1;
-
+    int targetx;
+    int targety;
+    targetx = x / 125;
+    targety = (y / 100) - 1; 
+    
+    printf("editbox_id[%d][%d]: %d      TOUCHX: %d  TOUCHY: %d\n",targetx, targety,editBox_id[targety][targetx], touchLocation.x, touchLocation.y);
     while(SDL_PollEvent(&evt) != 0 )
     {
       if(evt.type == SDL_TEXTINPUT)
@@ -770,24 +753,4 @@ void drawTextBox(int x, int y, int w, int h, const char *text)
   }
 }
 
-void instTextBoxGrid()
-{
-  for(int i = 0; i < 6; ++i)
-  {
-    for(int j = 0; j < 7; ++j)
-    {
-      instTextBox(x, y, w, h, id_counter);
-      
-    }
-  }
-}
 
-void instTextBox(int x, int y, int w, int h, int id_counter)
-{
-  strcpy(editbox[i].x, x);
-  strcpy(editbox[i].y  y);
-  strcpy(editbox[i].w, w);
-  strcpy(editbox[i].h, h);
-  strcpy(editbox[i].editBox_id, id_counter);
-  id_counter++; 
-}
