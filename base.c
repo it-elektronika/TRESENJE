@@ -16,11 +16,10 @@ int main()
   int programRunning = 1;
   while(programRunning)
   {
-    refreshTouch();
+ //   refreshTouch();
     loadPage(pageNumber);
     cycleCount();
     timestampRefresh();
-    printf("PAGE NUMBER: %d\n", pageNumber);
   }	  
   close();
   SDL_Quit();

@@ -32,8 +32,11 @@ void loadPage(int pageNumber);
 void passCheck(void);
 void drawGrid(void);
 void drawVarBar(void);
-void drawTextBox(int x, int y, int w, int h, const char *text);
-
+void drawTextBox(int i, int x, int y, int w, int h);
+void instTextBox(int x, int y, int w, int h, const char *text);
+void instTextBoxGrid(void);
+void drawEbGrid(void);
+void clearFocus(void);
 
 
 
