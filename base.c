@@ -10,13 +10,12 @@ int pageNumber = 0;
 
 int main()
 {
-  init();	// CREATES WINDOW AND RENDERER
-  initVars();
-  int counter = 0;
   int programRunning = 1;
+  init();	
+  initVars();
   while(programRunning)
   {
- //   refreshTouch();
+    refreshTouch();
     loadPage(pageNumber);
     cycleCount();
     timestampRefresh();

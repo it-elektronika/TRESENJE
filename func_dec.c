@@ -9,8 +9,8 @@
 #include <string.h>
 #include "func_init.h"
 
-//SPIValue sPIValue;
-//uint8_t i8uValue;
+/*SPIValue sPIValue;*/
+/*uint8_t i8uValue;*/
 
 void piControlOpen(void)
 {
@@ -81,7 +81,7 @@ int piControlRead(uint32_t Offset, uint32_t Length, uint8_t *pData)
 }
 
 
-uint8_t readVariableValue(char *pszVariableName)
+uint8_t readVariableValue(const char *pszVariableName)
 {
     int rc;
     SPIVariable sPiVariable;
@@ -95,7 +95,7 @@ uint8_t readVariableValue(char *pszVariableName)
     if (rc < 0)
     {
         printf("Cannot find variable '%s'\n", pszVariableName);
-        //return;
+        return 0;
     }
     if (sPiVariable.i16uLength == 1)
     {
@@ -109,52 +109,52 @@ uint8_t readVariableValue(char *pszVariableName)
         }
         else
         {
-        // printf("Get bit value: %d\n", sPIValue.i8uValue);
+        printf("Get bit value: %d\n", sPIValue.i8uValue);
         }
         
     }
-    //else if (sPiVariable.i16uLength == 8)
-    //{
-    //    while (1)
-    //    {
-    //        rc = piControlRead(sPiVariable.i16uAddress, 1, (uint8_t*)&i8uValue);
-    //        if (rc < 0)
-    //            printf("Read error\n");
-    //        else
-    //        {
-    //        }    //printf("Value of %s: %02x hex (=%d dez)\n", pszVariableName, i8uValue, i8uValue);
-    //        
-    //    }
-    // }
-    // else if (sPiVariable.i16uLength == 16)
-    // {
-    //     while (1)
-    //     {
-    //         rc = piControlRead(sPiVariable.i16uAddress, 2, (uint8_t*)&i16uValue);
-    //         if (rc < 0)
-    //             printf("Read error\n");
-    //         else
-    //         {
-    //         }    //printf("Value of %s: %04x hex (=%d dez)\n", pszVariableName, i16uValue, i16uValue);
-    //         
-    //     }
-    // }
-    // else if (sPiVariable.i16uLength == 32)
-    // {
-    //     while (1)
-    //     {
-    //         rc = piControlRead(sPiVariable.i16uAddress, 4, (uint8_t*)&i32uValue);
-    //         if (rc < 0)
-    //             printf("Read error\n");
-    //         else
-    //             //printf("Value of %s: %08x hex (=%d dez)\n", pszVariableName, i32uValue, i32uValue);
-    //        {}
-    //    }
-    // }
-    // else
-    // {
-    //     //printf("Could not read variable %s. Internal Error\n", pszVariableName);
-    // }
+     else if (sPiVariable.i16uLength == 8)
+    {
+        while (1)
+        {
+            rc = piControlRead(sPiVariable.i16uAddress, 1, (uint8_t*)&i8uValue);
+            if (rc < 0)
+                printf("Read error\n");
+            else
+            {
+            }    printf("Value of %s: %02x hex (=%d dez)\n", pszVariableName, i8uValue, i8uValue);
+            
+        }
+     }
+     else if (sPiVariable.i16uLength == 16)
+     {
+         while (1)
+         {
+             rc = piControlRead(sPiVariable.i16uAddress, 2, (uint8_t*)&i16uValue);
+             if (rc < 0)
+                 printf("Read error\n");
+             else
+             {
+             }    printf("Value of %s: %04x hex (=%d dez)\n", pszVariableName, i16uValue, i16uValue);
+             
+         }
+     }
+     else if (sPiVariable.i16uLength == 32)
+     {
+         while (1)
+         {
+             rc = piControlRead(sPiVariable.i16uAddress, 4, (uint8_t*)&i32uValue);
+             if (rc < 0)
+                 printf("Read error\n");
+             else
+                 printf("Value of %s: %08x hex (=%d dez)\n", pszVariableName, i32uValue, i32uValue);
+             {}
+       }
+     }
+     else
+     {
+         printf("Could not read variable %s. Internal Error\n", pszVariableName);
+     } 
     return sPIValue.i8uValue;
 }
 
@@ -185,7 +185,7 @@ int piControlWrite(uint32_t Offset, uint32_t Length, uint8_t *pData)
 }
 
 
-void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
+void writeVariableValue(const char *pszVariableName, uint32_t i32uValue)
 {
     int rc;
     SPIVariable sPiVariable;
@@ -209,17 +209,17 @@ void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 	
         
         if (rc < 0)
-	   printf("Set bit error"); //%s\n", getWriteError(rc));
+	   printf("Set bit error:");  /*%s\n", getWriteError(rc));*/
 	else
 	    printf("Set bit %d on byte at offset %d. Value %d\n", sPIValue.i8uBit, sPIValue.i16uAddress, sPIValue.i8uValue);
     } 
-    /*
+    
     else if (sPiVariable.i16uLength == 8) 
     {
 	i8uValue = i32uValue;
 	rc = piControlWrite(sPiVariable.i16uAddress, 1, (uint8_t *) & i8uValue);
 	if (rc < 0)
-	    printf("Write error %s\n", getWriteError(rc));
+	    printf("Write error:"); /* %s\n", getWriteError(rc)); */
 	else
 	    printf("Write value %d dez (=%02x hex) to offset %d.\n", i8uValue, i8uValue,
 		   sPiVariable.i16uAddress);
@@ -227,18 +227,18 @@ void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 	i16uValue = i32uValue;
 	rc = piControlWrite(sPiVariable.i16uAddress, 2, (uint8_t *) & i16uValue);
 	if (rc < 0)
-	    printf("Write error %s\n", getWriteError(rc));
+	    printf("Write error:"); /* %s\n", getWriteError(rc)); */
 	else
 	    printf("Write value %d dez (=%04x hex) to offset %d.\n", i16uValue, i16uValue,
 		   sPiVariable.i16uAddress);
     } else if (sPiVariable.i16uLength == 32) {
 	rc = piControlWrite(sPiVariable.i16uAddress, 4, (uint8_t *) & i32uValue);
 	if (rc < 0)
-	    printf("Write error %s\n", getWriteError(rc));
+	    printf("Write error:"); /* %s\n", getWriteError(rc)); */
 	else
 	    printf("Write value %d dez (=%08x hex) to offset %d.\n", i32uValue, i32uValue,
 		   sPiVariable.i16uAddress);
-    }*/
+    }
 }
 
 

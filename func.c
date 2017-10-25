@@ -47,31 +47,26 @@ int textureHeight = 0;
 int textureWidth = 0;
 int a = 90;
 int menuOpened = 0;
-const char *enteredText;
 const char *pageTitles[7];
 const char *inputLabels[14];
 const char *outputLabels[14];
-const char *grid[6][7];
 
-char* n_num[10];
-char * var_num[8];
-char* inp_arr[14];
-char* out_arr[14];
-char* i_num[14];
-char* o_num[14];
+const char* n_num[10];
+const char * var_num[8];
+const char* inp_arr[14];
+const char* out_arr[14];
+const char* i_num[14];
+const char* o_num[14];
 int input[14];
 int output[14];
-int clk = 0;
-int touchClk;
 
-SDL_Color textColor = {255, 255, 255};
+SDL_Color textColor = {255, 255, 255, 255};
 SDL_Renderer *renderer = NULL;
 SDL_Event evt;
 SDL_Window *window = NULL;
 SDL_Texture *texture = NULL;
 TTF_Font *textFont = NULL; 
 SDL_Point touchLocation = {-1, -1};
-
 
 struct editbox
 {
@@ -86,28 +81,34 @@ struct editbox
 struct editbox eb[42];
 
 int init()
-{ 
+{
+  
+  int flags=IMG_INIT_JPG|IMG_INIT_PNG;
+  int initted=IMG_Init(flags);	
+  pageNumber = 0;
+  printf("INIT\n"); 
+
   if((SDL_Init(SDL_INIT_VIDEO||SDL_INIT_AUDIO||SDL_INIT_TIMER)) != 0)
   {
     SDL_Log("Unable to initialize SDL:%s ", SDL_GetError());
     return 1;                                                                               
   }  
+
   window = SDL_CreateWindow("IT-Elektronika", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-		                            SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_BORDERLESS);
+  SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_BORDERLESS);
+  
   if (window == NULL)
   {
     printf("Could not create window: %s\n", SDL_GetError());
     return 1;
   }		  
-  
+
   renderer = SDL_CreateRenderer(window, - 1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if(renderer == NULL)
   {
     printf("Could not create renderer: %s\n", SDL_GetError());
   }
- 
-  int flags=IMG_INIT_JPG|IMG_INIT_PNG;
-  int initted=IMG_Init(flags);			    
+		    
   if((initted&flags) != flags)               
   {
     printf("IMG_Init: Failed to init required jpg and png support!\n");
@@ -118,10 +119,12 @@ int init()
     printf("SDL Could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
   }
   textFont = TTF_OpenFont("helvetica.ttf", 30);
+
   if(!textFont)
   {
     printf("TTF_OpenFont: %s\n", TTF_GetError());
   }
+    
   return 15;
 }
 
@@ -136,11 +139,12 @@ void freeTexture(void)
   }
 }
 
-bool writeText(const char *text, SDL_Color textColor)
+int writeText(const char *text, SDL_Color textColor)
 {
+  SDL_Surface* textSurface = TTF_RenderText_Solid(textFont, text, textColor);
+
   freeTexture();
 
-  SDL_Surface* textSurface = TTF_RenderText_Solid(textFont, text, textColor);
   if(textSurface == NULL)
   {
     printf("Unable to render text surface! SDL Error: %s\n", SDL_GetError());
@@ -162,10 +166,11 @@ bool writeText(const char *text, SDL_Color textColor)
   return texture != NULL;
 }
 
-bool loadIOLights(int value)
+int loadIOLights(int value)
 {
-  freeTexture();
   SDL_Surface *imageSurface;
+
+  freeTexture();
   if(value == 1)
   {
     imageSurface = IMG_Load("/home/pi/tresenje_sdl/on.png");
@@ -224,12 +229,14 @@ void close()
 
 void initVars()
 {
-  editBox_id_counter = 1;
-  int zero = 0;
   int x = 50;
   int y = 100;
   int w = 125;
   int h = 100;
+  editBox_id_counter = 1;
+
+  printf("INIT VARS\n");
+
   for(row = 0; row < 6; ++row)
   {
     for(column = 0; column < 7; ++column)
@@ -239,8 +246,8 @@ void initVars()
       eb[editBox_id_counter].w = w;
       eb[editBox_id_counter].h = h;
       eb[editBox_id_counter].hasFocus = 0;
-      strcpy("0\0", eb[editBox_id_counter].value);
-      //printf("ebval[%d]: %s\n", editBox_id_counter, ebVal[editBox_id_counter]);
+      strcpy(eb[editBox_id_counter].value, "0\0");
+      /*printf("ebval[%d]: %s\n", editBox_id_counter, ebVal[editBox_id_counter]); */
       
       editBox_id_counter++;
       x = x + w;
@@ -330,12 +337,14 @@ void initVars()
   out_arr[11] = "OUTPUT 12:";
   out_arr[12] = "OUTPUT 13:";
   out_arr[13] = "OUTPUT 14:";
+  printf("end of init vars\n");
 }
 
 void drawIOLights()
 { 
   int a = 95;
-  for(int i = 0; i < 14; ++i)
+  int i;
+  for(i = 0; i < 14; ++i)
   {
     loadIOLights(input[i]);
     render(225, a, NULL, 0.0, NULL, SDL_FLIP_NONE); 
@@ -343,7 +352,7 @@ void drawIOLights()
   }
   a = 95;
 
-  for(int i = 0; i < 14; ++i)
+  for(i = 0; i < 14; ++i)
   {
     loadIOLights(output[i]);
     render(625, a, NULL, 0.0, NULL, SDL_FLIP_NONE); 
@@ -351,7 +360,7 @@ void drawIOLights()
   }   
 }
 
-void toggleOutput(char *io_num, int io_n, int x1, int x2, int y1, int y2)
+void toggleOutput(const char *io_num, int io_n, int x1, int x2, int y1, int y2)
 {
   if(touchLocation.x >= x1 && touchLocation.x <= x2 && touchLocation.y >= y1 && touchLocation.y <= y2
      && oldtimestamp != timestamp)
@@ -369,7 +378,13 @@ void toggleOutput(char *io_num, int io_n, int x1, int x2, int y1, int y2)
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
-  SDL_Rect renderQuad = { x, y, textureWidth, textureHeight};
+  
+  SDL_Rect renderQuad;
+  renderQuad.x = x;
+  renderQuad.y = y;
+  renderQuad.w = textureWidth;
+  renderQuad.h = textureHeight;
+
   if(clip != NULL)
   {
     renderQuad.w = clip -> w;
@@ -380,7 +395,8 @@ void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_R
 
 void readVariables()
 {
-  for(int i = 0; i < 14; ++i)
+  int i;
+  for(i = 0; i < 14; ++i)
   {
     input[i] = readVariableValue(i_num[i]);
     output[i] = readVariableValue(o_num[i]);
@@ -389,14 +405,15 @@ void readVariables()
 
 void drawLabels(void)
 {
-  for(int i = 0; i < 14; ++i)
+  int i;
+  for(i = 0; i < 14; ++i)
   {
     inputLabels[i] = inp_arr[i];
     outputLabels[i] = out_arr[i];
   }
   
   a = 90;
-  for(int i = 0; i < 14; ++i)
+  for(i = 0; i < 14; ++i)
   {
     writeText(inputLabels[i], textColor);
     render(50, a, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -404,7 +421,7 @@ void drawLabels(void)
   }
   a = 90;
 
-  for(int i = 0; i < 14; ++i)
+  for(i = 0; i < 14; ++i)
   {
     writeText(outputLabels[i], textColor);
     render(400, a, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -417,7 +434,8 @@ void writeVariables()
 {
   int y1 = 95;
   int y2 = 145;
-  for(int i = 0; i < 14; ++i)
+  int i;
+  for(i = 0; i < 14; ++i)
   {
     toggleOutput(o_num[i], (i+1), 625, 675, y1, y2);
     y1 = y1 + 50;
@@ -511,22 +529,18 @@ void closeMenu(void)
   if(touchLocation.x >= 1205 && touchLocation.y <= 75 && timestamp > oldtimestamp && menuOpened == 1 && cycleCounter != menuValueCheck) 
   { 
     menuOpened = 0;
- //   printf("MENU CLOSE: %d\n", menuOpened);
- //   printf("TS: %d\n", timestamp);
- //   printf("TSOLD: %d\n", oldtimestamp);
- //   printf("MENUVALUECHECK: %d\n", menuValueCheck);
- //   printf("CYCLECOUNTER: %d\n", cycleCounter);
   }
 }
 
 void timestampRefresh(void)
 {
+  printf("TIMESTAMP REFRESH\n");
   oldtimestamp = timestamp;
 }
 
 void refreshTouch(void)
 {
-  enteredText = ""; 
+  printf("REFRESH TOUCH\n");
   while(SDL_PollEvent(&evt) != 0 )
   {
     if(evt.type == SDL_FINGERDOWN)
@@ -550,7 +564,7 @@ void refreshTouch(void)
       strcat(text2, "*");
     }
     
-    if(evt.type = SDL_KEYDOWN && pageNumber == 1 )
+    if(evt.type == SDL_KEYDOWN && pageNumber == 1 )
     {
       if(evt.key.keysym.sym == SDLK_BACKSPACE && strlen(text1) > 0)
       {
@@ -574,13 +588,14 @@ void cycleCount()
 
 void drawMenuItems(void)
 {
+  int i;
   int x = 905;
   int y = 100; 
   writeText("MENU", textColor);
   render(905, 25, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
- 
- for(int i = 0; i < 6; ++i)
+  
+  for(i = 0; i < 6; ++i)
   {
     writeText(pageTitles[i], textColor);
     render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -662,10 +677,7 @@ void page_editor(void)
   writeText(buffMV, textColor);
   render(930, 300, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
- // writeText(editText, textColor);
- // render((editBox_x[targety][targetx]+padx), (editBox_y[targety][targetx]+pady), NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-  //printf("editText: %d\n", evt.text.text);  
   if(adminAccess == 1)
   {
     openMenu();
@@ -701,24 +713,31 @@ void page_settings(void)
 
 void loadPage(int pageNumber)
 {
+  printf("LOAD PAGE\n");
   switch(pageNumber)
   {
     case 0:
       page_main();
+      printf("page loaded: %d\n", pageNumber);
       break;
     case 1:
       page_admin();
+      printf("page loaded: %d\n", pageNumber);
       break;
     case 2:
       page_editor();
+      printf("page loaded: %d\n", pageNumber);
       break;
     case 3:
       page_loader();
+      printf("page loaded: %d\n", pageNumber);
       break;
     case 4:
+      printf("page loaded: %d\n", pageNumber);
       page_settings();
       break;
     case 5: 
+      printf("page loaded: %d\n", pageNumber);
       page_statusIO();
       break;   
   }
@@ -736,18 +755,16 @@ void passCheck(void)
     text2[0] = 0;
     adminAccess = 1;
   }
-  else
-  {
-  }
 }
 
 void drawGrid()
 { 
-  editBox_id_counter = 1;
   int x = 50;
   int y = 100;
   int w = 125;
   int h = 100;
+  editBox_id_counter = 1;
+
   for(row = 0; row < 6; ++row)
   {
     for(column = 0; column < 7; ++column)
@@ -758,7 +775,6 @@ void drawGrid()
       editBox_y[row][column] = y;
       editBox_id_counter++;
       x = x + w;
-   //   printf("editbox_id[%d][%d]: %d\n",i, j,editBox_id[i][j],editBox_id_counter);
     }
     x = 50;
     y = y + h;  
@@ -769,8 +785,7 @@ void drawGrid()
 
 void drawEbGrid(void)
 {
-  
-  
+  int i;
   while(SDL_PollEvent(&evt) != 0 )
   {
     if(evt.type == SDL_FINGERDOWN)
@@ -789,8 +804,7 @@ void drawEbGrid(void)
     }
     if(evt.type == SDL_TEXTINPUT)
     { 
- //     sprintf(ebVal, "%d\0\n", evt.text.text);
-      for(int i = 1; i < 43; ++i)
+      for(i = 1; i < 43; ++i)
       {
         if(eb[i].hasFocus == 1)
         {
@@ -799,10 +813,9 @@ void drawEbGrid(void)
       }
      
     }
-  
-    if(evt.type = SDL_KEYDOWN)
+    if(evt.type == SDL_KEYDOWN)
     { 
-      for(int i = 1; i < 43; ++i)
+      for(i = 1; i < 43; ++i)
       {
         if(evt.key.keysym.sym == SDLK_BACKSPACE && strlen(eb[i].value) > 0 && eb[i].hasFocus == 1)
         {
@@ -812,7 +825,7 @@ void drawEbGrid(void)
     } 
   }
   
-  for(int i = 1; i < 43; ++i)
+  for(i = 1; i < 43; ++i)
   {
     drawTextBox(i, eb[i].x, eb[i].y, eb[i].w, eb[i].h);
   }
@@ -822,15 +835,15 @@ void drawVarBar(void)
 {
   int y = 300;
   int x = 25;
-  
-  for(int i = 0; i < 8; ++i)
+  int i;
+  for(i = 0; i < 8; ++i)
   {
     writeText(var_num[i], textColor);
     render(x, 200, NULL, 0.0, NULL, SDL_FLIP_NONE);
     x = x + 150;
   }
 
-  for(int i = 0; i < 10; ++i)
+  for(i = 0; i < 10; ++i)
   {
     writeText(n_num[i], textColor);
     render(25, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -869,7 +882,7 @@ void drawTextBox(int i, int x, int y, int w, int h)
   }
   else if(eb[i].hasFocus == 1)
   {
-    SDL_SetRenderDrawColor(renderer, 0x70, 0x191, 0x63, 0xFF);
+    SDL_SetRenderDrawColor(renderer, 70, 191, 63, 255);
     SDL_RenderDrawLine(renderer, x, y, (x+w), y);
     SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
     SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
@@ -883,7 +896,8 @@ void drawTextBox(int i, int x, int y, int w, int h)
 
 void clearFocus()
 {
-  for(int i = 1; i < 43; ++i)
+  int i;
+  for(i = 1; i < 43; ++i)
   {
     eb[i].hasFocus = 0;
   }
