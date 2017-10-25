@@ -14,7 +14,7 @@ char buffMV[100];
 char ebVal[42][5];
 
 int menuValueCheck = 0; 
-
+int focusBoxNumber = 0;
 
 int hasFocus = 0;
 char text1[10];
@@ -86,7 +86,6 @@ int init()
   int flags=IMG_INIT_JPG|IMG_INIT_PNG;
   int initted=IMG_Init(flags);	
   pageNumber = 0;
-  printf("INIT\n"); 
 
   if((SDL_Init(SDL_INIT_VIDEO||SDL_INIT_AUDIO||SDL_INIT_TIMER)) != 0)
   {
@@ -99,14 +98,13 @@ int init()
   
   if (window == NULL)
   {
-    printf("Could not create window: %s\n", SDL_GetError());
     return 1;
   }		  
 
   renderer = SDL_CreateRenderer(window, - 1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if(renderer == NULL)
   {
-    printf("Could not create renderer: %s\n", SDL_GetError());
+    printf("RENDERER IS NULL");
   }
 		    
   if((initted&flags) != flags)               
@@ -235,7 +233,6 @@ void initVars()
   int h = 100;
   editBox_id_counter = 1;
 
-  printf("INIT VARS\n");
 
   for(row = 0; row < 6; ++row)
   {
@@ -337,7 +334,6 @@ void initVars()
   out_arr[11] = "OUTPUT 12:";
   out_arr[12] = "OUTPUT 13:";
   out_arr[13] = "OUTPUT 14:";
-  printf("end of init vars\n");
 }
 
 void drawIOLights()
@@ -465,12 +461,7 @@ void openMenu()
   if(touchLocation.x >= 1205 && touchLocation.y <= 75 && timestamp > oldtimestamp && menuOpened == 0) 
   {
     menuOpened = 1;
-    printf("OPEN MENU: %d\n", menuOpened);
-    printf("TS: %d\n", timestamp);
-    printf("TSOLD: %d\n", oldtimestamp);
     menuValueCheck = cycleCounter;
-    printf("MENUVALUECHECK: %d\n", menuValueCheck);
-    printf("CYCLECOUNTER: %d\n", cycleCounter);
   }
   if(menuOpened == 1)
   {
@@ -534,13 +525,11 @@ void closeMenu(void)
 
 void timestampRefresh(void)
 {
-  printf("TIMESTAMP REFRESH\n");
   oldtimestamp = timestamp;
 }
 
 void refreshTouch(void)
 {
-  printf("REFRESH TOUCH\n");
   while(SDL_PollEvent(&evt) != 0 )
   {
     if(evt.type == SDL_FINGERDOWN)
@@ -687,10 +676,14 @@ void page_editor(void)
 
 void page_loader(void)
 {
+  checkFocus();
+  eventUpdate(focusBoxNumber);
   draw();
   drawMenu();
   drawPageTitle(pageNumber); 
   drawEbGrid();
+
+  
 
   if(adminAccess == 1)
   {
@@ -713,31 +706,24 @@ void page_settings(void)
 
 void loadPage(int pageNumber)
 {
-  printf("LOAD PAGE\n");
   switch(pageNumber)
   {
     case 0:
       page_main();
-      printf("page loaded: %d\n", pageNumber);
       break;
     case 1:
       page_admin();
-      printf("page loaded: %d\n", pageNumber);
       break;
     case 2:
       page_editor();
-      printf("page loaded: %d\n", pageNumber);
       break;
     case 3:
       page_loader();
-      printf("page loaded: %d\n", pageNumber);
       break;
     case 4:
-      printf("page loaded: %d\n", pageNumber);
       page_settings();
       break;
     case 5: 
-      printf("page loaded: %d\n", pageNumber);
       page_statusIO();
       break;   
   }
@@ -786,44 +772,7 @@ void drawGrid()
 void drawEbGrid(void)
 {
   int i;
-  while(SDL_PollEvent(&evt) != 0 )
-  {
-    if(evt.type == SDL_FINGERDOWN)
-    { 
-      timestamp = evt.tfinger.timestamp;
-      timestampDown = evt.tfinger.timestamp;
-      touchLocation.x = evt.tfinger.x;
-      touchLocation.y = evt.tfinger.y;
-    }
-    if(evt.type == SDL_FINGERUP)
-    {
-      timestampUp = evt.tfinger.timestamp; 
-      touchLocation.x = evt.tfinger.x;
-      touchLocation.y = evt.tfinger.y;
-      timestampUp = 0;
-    }
-    if(evt.type == SDL_TEXTINPUT)
-    { 
-      for(i = 1; i < 43; ++i)
-      {
-        if(eb[i].hasFocus == 1)
-        {
-          strcat(eb[i].value, evt.text.text);
-        }
-      }
-     
-    }
-    if(evt.type == SDL_KEYDOWN)
-    { 
-      for(i = 1; i < 43; ++i)
-      {
-        if(evt.key.keysym.sym == SDLK_BACKSPACE && strlen(eb[i].value) > 0 && eb[i].hasFocus == 1)
-        {
-          eb[i].value[strlen(eb[i].value) - 1] = 0;
-        }
-      }
-    } 
-  }
+  
   
   for(i = 1; i < 43; ++i)
   {
@@ -902,3 +851,61 @@ void clearFocus()
     eb[i].hasFocus = 0;
   }
 }
+
+void eventUpdate(int i)
+{
+  while(SDL_PollEvent(&evt) != 0 )
+  {
+    if(evt.type == SDL_FINGERDOWN)
+    { 
+      timestamp = evt.tfinger.timestamp;
+      timestampDown = evt.tfinger.timestamp;
+      touchLocation.x = evt.tfinger.x;
+      touchLocation.y = evt.tfinger.y;
+    }
+    if(evt.type == SDL_FINGERUP)
+    {
+      timestampUp = evt.tfinger.timestamp; 
+      touchLocation.x = evt.tfinger.x;
+      touchLocation.y = evt.tfinger.y;
+      timestampUp = 0;
+    }
+    if(evt.type == SDL_TEXTINPUT)
+    { 
+      for(i = 1; i < 43; ++i)
+      {
+        if(eb[i].hasFocus == 1)
+        {
+          strcat(eb[i].value, evt.text.text);
+          printf("Typing\n");
+        }
+      }
+     
+    }
+    if(evt.type == SDL_KEYDOWN)
+    { 
+      for(i = 1; i < 43; ++i)
+      {
+        if(evt.key.keysym.sym == SDLK_BACKSPACE && strlen(eb[i].value) > 0 && eb[i].hasFocus == 1)
+        {
+          eb[i].value[strlen(eb[i].value) - 1] = 0;
+        }
+      }
+    } 
+  }
+}
+
+void checkFocus(void)
+{
+  int i;
+  for(i = 1; i < 43; ++i)
+  {
+    if(eb[i].hasFocus == 1)
+    {
+      focusBoxNumber = i;
+    }
+  }
+  /*printf("FOCUS NUMBER: %d\n", focusBoxNumber);*/
+}
+
+

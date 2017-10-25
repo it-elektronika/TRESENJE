@@ -37,8 +37,8 @@ void instTextBox(int x, int y, int w, int h, const char *text);
 void instTextBoxGrid(void);
 void drawEbGrid(void);
 void clearFocus(void);
-
-
+void eventUpdate(int i);
+void checkFocus(void);
 
 
 #endif
